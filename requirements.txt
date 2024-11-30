@@ -11,3 +11,5 @@ psutil
 shortzy
 jinja2
 humanize
+pyromod==1.5
+pytz
