@@ -140,7 +140,7 @@ async def unban(c, m):
         await db.remove_ban(user_id)
         print(unban_log_text)
         await m.reply_text(unban_log_text, quote=True)
-    exce        return
+           return
     if len(m.command) == 1:
         await m.reply_text(
             f"Use this command to unban 😃 any user.\n\nUsage:\n\n`/unban_user user_id`\n\nEg: `/unban_user 1234567`\n This will unban user with id `1234567`.",
