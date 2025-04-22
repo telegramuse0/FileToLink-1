@@ -38,45 +38,63 @@ files = glob.glob(ppath)
 TechVJBot.start()
 loop = asyncio.get_event_loop()
 
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from ban_list import ban_user, is_banned
 
-async def start():
-    print('\n')
-    print('Initalizing Your Bot')
-    bot_info = await TechVJBot.get_me()
-    await initialize_clients()
-    for name in files:
-        with open(name) as a:
-            patt = Path(a.name)
-            plugin_name = patt.stem.replace(".py", "")
-            plugins_dir = Path(f"plugins/{plugin_name}.py")
-            import_path = "plugins.{}".format(plugin_name)
-            spec = importlib.util.spec_from_file_location(import_path, plugins_dir)
-            load = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(load)
-            sys.modules["plugins." + plugin_name] = load
-            print("Tech VJ Imported => " + plugin_name)
-    if ON_HEROKU:
-        asyncio.create_task(ping_server())
-    me = await TechVJBot.get_me()
-    temp.BOT = TechVJBot
-    temp.ME = me.id
-    temp.U_NAME = me.username
-    temp.B_NAME = me.first_name
-    tz = pytz.timezone('Asia/Kolkata')
-    today = date.today()
-    now = datetime.now(tz)
-    time = now.strftime("%H:%M:%S %p")
-    await TechVJBot.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
-    app = web.AppRunner(await web_server())
-    await app.setup()
-    bind_address = "0.0.0.0"
-    await web.TCPSite(app, bind_address, PORT).start()
-    await idle()
+app = Client("FileToLinkBot")  # Make sure this line is at the top of your bot.py
 
+# List of admin user IDs
+ADMIN_IDS = [1708370518]  # Replace with the actual Telegram user IDs of bot admins
 
-if __name__ == '__main__':
-    try:
-        loop.run_until_complete(start())
-    except KeyboardInterrupt:
-        logging.info('Service Stopped Bye 👋')
+@app.on_message(filters.private | filters.group | filters.channel)
+async def handle_message(client, message: Message):
+    user_id = message.from_user.id
+    chat_id = message.chat.id  # The chat ID from where the message is sent
+    chat_type = message.chat.type  # 'private', 'group', 'supergroup', 'channel'
 
+    # Check if the user is banned
+    if is_banned(user_id):
+        await message.reply_text("You are banned.")
+        return
+
+    # Determine where the message came from
+    if chat_type == "private":
+        chat_origin = "Private Chat"
+    elif chat_type == "group":
+        chat_origin = "Group Chat"
+    elif chat_type == "supergroup":
+        chat_origin = "Supergroup Chat"
+    elif chat_type == "channel":
+        chat_origin = "Channel"
+    else:
+        chat_origin = "Unknown"
+
+    # Check what kind of file is sent
+    if message.document:
+        file_type = "document"
+        file_name = message.document.file_name
+        file_size = message.document.file_size
+    elif message.video:
+        file_type = "video"
+        file_name = message.video.file_name
+        file_size = message.video.file_size
+    elif message.audio:
+        file_type = "audio"
+        file_name = message.audio.file_name
+        file_size = message.audio.file_size
+    elif message.photo:
+        file_type = "photo"
+        file_name = "Photo (no name)"
+        file_size = message.photo.file_size
+    else:
+        await message.reply_text("Unsupported file type.")
+        return
+
+    # Respond with file details
+    await message.reply_text(
+        f"Received a {file_type} from a {chat_origin}:\n"
+        f"File Name: {file_name}\n"
+        f"Size: {file_size / (1024 * 1024):.2f} MB\n"
+        f"Chat ID: {chat_id}"
+    )
