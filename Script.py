@@ -14,10 +14,14 @@ Now Send Me A Media To See Magic ✨</b>"""
 ID - <code>{}</code>
 Nᴀᴍᴇ - {}"""
     
-    RESTART_TXT = """
-<b>Bᴏᴛ Rᴇsᴛᴀʀᴛᴇᴅ !
-
-📅 Dᴀᴛᴇ : <code>{}</code>
+    📅 Dᴀᴛᴇ : <code>{}</code>
 ⏰ Tɪᴍᴇ : <code>{}</code>
 🌐 Tɪᴍᴇᴢᴏɴᴇ : <code>Asia/Kolkata</code>
 🛠️ Bᴜɪʟᴅ Sᴛᴀᴛᴜs: <code>v2.7.1 [ Sᴛᴀʙʟᴇ ]</code></b>"""
+
+RESTART_TXT = "Bot Restarted on {}\nTime: {}"
+    ADMIN_MENU = "**Admin Panel**\n/stats - View bot stats\n/ban [user_id] - Ban user\n/unban [user_id] - Unban user"
+    BANNED_MSG = "You are banned from using this bot."
+    UNAUTHORIZED_MSG = "You are not authorized to use this bot."
+    BANNED_SUCCESS = "User `{}` has been banned."
+    UNBANNED_SUCCESS = "User `{}` has been unbanned."
