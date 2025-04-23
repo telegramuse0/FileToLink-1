@@ -1,11 +1,36 @@
 from pyrogram import Client, filters
 from pyrogram.types import CallbackQuery
-from Script import script
+from Script import script  # make sure script has HELP_TXT, ABOUT_TXT
 
-@Client.on_callback_query(filters.regex("help"))
-async def help_cb(client, callback_query: CallbackQuery):
-    await callback_query.message.edit_text(script.HELP_TXT, disable_web_page_preview=True)
+@Client.on_callback_query()
+async def cb_handler(client, query: CallbackQuery):
+    if query.data == "help":
+        await query.message.edit_text(
+            text=script.HELP_TXT,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("Back", callback_data="start"),
+                 InlineKeyboardButton("Close", callback_data="close")]
+            ])
+        )
 
-@Client.on_callback_query(filters.regex("about"))
-async def about_cb(client, callback_query: CallbackQuery):
-    await callback_query.message.edit_text(script.ABOUT_TXT, disable_web_page_preview=True)
+    elif query.data == "about":
+        await query.message.edit_text(
+            text=script.ABOUT_TXT,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("Back", callback_data="start"),
+                 InlineKeyboardButton("Close", callback_data="close")]
+            ])
+        )
+
+    elif query.data == "start":
+        await query.message.edit_text(
+            text=script.START_TXT,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("Help", callback_data="help"),
+                 InlineKeyboardButton("About", callback_data="about")],
+                [InlineKeyboardButton("Close", callback_data="close")]
+            ])
+        )
+
+    elif query.data == "close":
+        await query.message.delete()
