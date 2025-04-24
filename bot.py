@@ -1,7 +1,3 @@
-# Don't Remove Credit @VJ_Botz
-# Subscribe YouTube Channel For Amazing Bot @Tech_VJ
-# Ask Doubt on telegram @KingVJ01
-
 import sys, glob, importlib, logging, logging.config, pytz, asyncio, os
 from pathlib import Path
 from pyrogram import idle
@@ -27,8 +23,9 @@ logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
 # Find all plugins
 ppath = "plugins/*.py"
 files = glob.glob(ppath)
+
+# Start the bot client
 TechVJBot.start()
-loop = asyncio.get_event_loop()
 
 async def start():
     print("\nInitializing Your Bot...\n")
@@ -38,24 +35,22 @@ async def start():
 
     # Plugin loader
     for name in files:
-        with open(name) as a:
-            patt = Path(a.name)
-            plugin_name = patt.stem.replace(".py", "")
-            plugins_dir = Path(f"plugins/{plugin_name}.py")
-            import_path = "plugins.{}".format(plugin_name)
-            spec = importlib.util.spec_from_file_location(import_path, plugins_dir)
-            load = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(load)
-            sys.modules["plugins." + plugin_name] = load
-            print("Tech VJ Imported => " + plugin_name)
+        with open(name):
+            plugin_name = Path(name).stem
+            import_path = f"plugins.{plugin_name}"
+            spec = importlib.util.spec_from_file_location(import_path, name)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            sys.modules[import_path] = module
+            print("Tech VJ Imported =>", plugin_name)
 
-    # Store bot info for global use
+    # Store bot info globally
     temp.BOT = TechVJBot
     temp.ME = bot_info.id
     temp.U_NAME = bot_info.username
     temp.B_NAME = bot_info.first_name
 
-    # Restart log message
+    # Restart log
     tz = pytz.timezone('Asia/Kolkata')
     now = datetime.now(tz)
     today = date.today()
@@ -68,10 +63,13 @@ async def start():
     await web.TCPSite(app, "0.0.0.0", int(os.environ.get("PORT", 8080))).start()
 
     print("Bot is running. Waiting for events...")
-    await idle()  # Prevent app from stopping
+    await idle()  # Keeps the bot running
 
 if __name__ == '__main__':
     try:
+        # Properly create and set a new event loop
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         loop.run_until_complete(start())
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         logging.info('Service Stopped Bye 👋')
