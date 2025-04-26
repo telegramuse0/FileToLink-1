@@ -1,11 +1,6 @@
-# Don't Remove Credit @VJ_Botz
-# Subscribe YouTube Channel For Amazing Bot @Tech_VJ
-# Ask Doubt on telegram @KingVJ01
-
-# Clone Code Credit : YT - @Tech_VJ / TG - @VJ_Bots / GitHub - @VJBots
-
 import sys, glob, importlib, logging, logging.config, pytz, asyncio
 from pathlib import Path
+import signal
 
 # Get logging configurations
 logging.config.fileConfig('logging.conf')
@@ -36,14 +31,13 @@ from TechVJ.bot.clients import initialize_clients
 ppath = "plugins/*.py"
 files = glob.glob(ppath)
 TechVJBot.start()
-loop = asyncio.get_event_loop()
-
 
 async def start():
     print('\n')
-    print('Initalizing Your Bot')
+    print('Initializing Your Bot')
     bot_info = await TechVJBot.get_me()
     await initialize_clients()
+    
     for name in files:
         with open(name) as a:
             patt = Path(a.name)
@@ -55,8 +49,10 @@ async def start():
             spec.loader.exec_module(load)
             sys.modules["plugins." + plugin_name] = load
             print("Tech VJ Imported => " + plugin_name)
+    
     if ON_HEROKU:
         asyncio.create_task(ping_server())
+    
     me = await TechVJBot.get_me()
     temp.BOT = TechVJBot
     temp.ME = me.id
@@ -66,16 +62,24 @@ async def start():
     today = date.today()
     now = datetime.now(tz)
     time = now.strftime("%H:%M:%S %p")
+    
     await TechVJBot.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
+    
     app = web.AppRunner(await web_server())
     await app.setup()
     bind_address = "0.0.0.0"
     await web.TCPSite(app, bind_address, PORT).start()
     await idle()
 
+def handle_sigterm(signal, frame):
+    logging.info("Received SIGTERM, shutting down gracefully...")
+    sys.exit(0)  # Graceful exit on receiving SIGTERM
+
+# Register the SIGTERM signal handler
+signal.signal(signal.SIGTERM, handle_sigterm)
 
 if __name__ == '__main__':
     try:
-        loop.run_until_complete(start())
+        asyncio.run(start())  # Use asyncio.run() instead of get_event_loop() to avoid deprecation
     except KeyboardInterrupt:
         logging.info('Service Stopped Bye 👋')
