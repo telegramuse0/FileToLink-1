@@ -80,6 +80,10 @@ signal.signal(signal.SIGTERM, handle_sigterm)
 
 if __name__ == '__main__':
     try:
-        asyncio.run(start())  # Use asyncio.run() instead of get_event_loop() to avoid deprecation
+        # Get the event loop once and use it for all async tasks
+        loop = asyncio.get_event_loop()
+
+        # Make sure the loop is used correctly
+        loop.run_until_complete(start())
     except KeyboardInterrupt:
         logging.info('Service Stopped Bye 👋')
