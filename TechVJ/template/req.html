@@ -228,61 +228,74 @@
         </div>
 
         <!-- External video player section -->
-	    
- <div class="header">
-        <h1>File Streaming</h1>
-        <a href="https://t.me/SilentXBotz" class="telegram-btn">
-            <i class="fab fa-telegram-plane"></i>
+	<div class="container-fluid d-flex flex-column align-items-center p-4 bg-dark text-light">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center w-100 mb-4">
+        <h1 class="text-warning">File Streaming</h1>
+        <a href="https://t.me/SilentXBotz" class="btn btn-outline-info rounded-circle">
+            <i class="fab fa-telegram-plane fa-lg"></i>
         </a>
     </div>
-    <div class="container">
-        <div class="player-container">
-            <video id="player" class="player" playsinline controls>
-                <source src="{{file_url}}" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
+
+    <!-- Video Player -->
+    <div class="w-100 d-flex justify-content-center mb-4">
+        <video id="player" class="w-100 rounded shadow" playsinline controls>
+            <source src="{{file_url}}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <!-- File Info -->
+    <div class="bg-secondary p-3 rounded shadow-sm mb-4 w-100">
+        <div class="d-flex align-items-center mb-2">
+            <img src="https://i.postimg.cc/vBqZTVVn/folder-6801869.png" alt="File" width="30" class="me-2">
+            <h4 class="mb-0">File Information</h4>
         </div>
-        <div class="file-info">
-            <div class="title">
-                <img src="https://i.postimg.cc/vBqZTVVn/folder-6801869.png" alt="File">
-                <h3>File Information</h3>
-            </div>
-            <p><strong>Name:</strong> {{file_name}}</p>
-            <p><strong>Size:</strong> {{file_size}}</p>
-        </div><div class="action-buttons">
-        <div class="button-row">
-            <button class="vlc" onclick="vlc_player()"><img src="https://i.postimg.cc/15TQ4y7B/vlc.png" alt="VLC">Watch in VLC</button>
-            <button class="mx" onclick="mx_player()"><img src="https://i.postimg.cc/sx4Msv4T/mx.png" alt="MX">Watch in MX Player</button>
+        <p class="mb-1"><strong>Name:</strong> {{file_name}}</p>
+        <p class="mb-0"><strong>Size:</strong> {{file_size}}</p>
+    </div>
+
+    <!-- Player Buttons -->
+    <div class="row w-100 justify-content-center gap-3 mb-3">
+        <div onclick="vlc_player()" class="col-5 col-md-2 btn btn-outline-light d-flex flex-column align-items-center py-3">
+            <img src="https://i.postimg.cc/15TQ4y7B/vlc.png" alt="VLC" width="40" class="mb-2"> VLC Player
         </div>
-        <div class="button-row">
-            <button class="playit" onclick="playit_player()"><img src="https://i.postimg.cc/RVGWYJFF/playit.png" alt="PlayIt">Watch in PlayIt</button>
+        <div onclick="mx_player()" class="col-5 col-md-2 btn btn-outline-light d-flex flex-column align-items-center py-3">
+            <img src="https://i.postimg.cc/sx4Msv4T/mx.png" alt="MX" width="40" class="mb-2"> MX Player
         </div>
-        <div class="button-row download-row">
-            <button class="download" onclick="Download()">
-                <i class="fas fa-download" style="margin-right: 0.5rem;"></i>Download
-            </button>
+        <div onclick="playit_player()" class="col-5 col-md-2 btn btn-outline-light d-flex flex-column align-items-center py-3">
+            <img src="https://i.postimg.cc/RVGWYJFF/playit.png" alt="PlayIt" width="40" class="mb-2"> PlayIt
         </div>
-        <div class="button-row copy-share">
-            <button class="copy" onclick="copy_url()"><i class="fas fa-copy"></i>Copy URL</button>
-            <button class="share" onclick="shareButton()"><i class="fas fa-share-alt"></i>Share URL</button>
+        <div onclick="Download()" class="col-5 col-md-2 btn btn-outline-success d-flex align-items-center justify-content-center py-3">
+            <i class="fas fa-download me-2"></i> Download
         </div>
     </div>
+
+    <!-- Share/Copy Buttons -->
+    <div class="row w-100 justify-content-center gap-3 mb-4">
+        <div onclick="copy_url()" class="col-5 col-md-2 btn btn-outline-warning d-flex align-items-center justify-content-center py-3">
+            <i class="fas fa-copy me-2"></i> Copy URL
+        </div>
+        <div onclick="shareButton()" class="col-5 col-md-2 btn btn-outline-warning d-flex align-items-center justify-content-center py-3">
+            <i class="fas fa-share-alt me-2"></i> Share URL
+        </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="bg-light text-dark rounded p-3 shadow-sm w-100 mb-2">
+        <div class="d-flex align-items-center mb-2">
+            <img src="https://i.postimg.cc/zXs0sH6x/info-button.png" alt="Warning" width="30" class="me-2">
+            <h5 class="mb-0">Disclaimer</h5>
+        </div>
+        <p class="mb-1">SilentXBotz does not host or own the streamed content. Users are responsible for complying with copyright laws.</p>
+        <p class="mb-0">All media is sourced from third-party services. SilentXBotz is not liable for misuse or legal violations.</p>
+    </div>
+
+    <!-- Message Popup -->
     <div id="messagePopup" class="message-popup"></div>
-    <div class="disclaimer">
-        <div class="title">
-            <img src="https://i.postimg.cc/zXs0sH6x/info-button.png" alt="Warning">
-            <h3>Disclaimer</h3>
-        </div>
-        <p>SilentXBotz Does Not Host Or Own The Streamed Content. Users Are Responsible For Complying With Copyright Laws.</p>
-        <p>All Media Is Sourced From Third-Party Services, And SilentXBotz Is Not Liable For Misuse Or Legal Violations.</p>
-    </div>
-    </div>
 
-        <footer class="bg-dark justify-content-around align-items-center">
-
-            <div class="container-fluid  justify-content-center align-itemsd x. -center">
- 
-
+	</div>
                 <!-- Copyright -->
 
             </div> 
