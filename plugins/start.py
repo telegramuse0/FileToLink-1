@@ -332,11 +332,8 @@ async def stream_start(client, message):
     caption = (
         f"•• Link generated for ID #{user.id}\n"
         f"•• Username: {esc(username)}\n"
-        f"•• Name: {esc(user_name)}\n"
         f"•• File name: {esc(original_name)}\n"
         f"•• File size: {esc(size)}\n"
-        f"•• File type: {esc(message.media.value)}\n"
-        f"•• Upload time: {esc(message.date)}\n\n"
         f"<b>📤 Source details</b>\n"
         f"{get_source_details(message)}\n\n"
         f"<b>🚀 Fast Download:</b>\n{esc(download_url)}\n\n"
