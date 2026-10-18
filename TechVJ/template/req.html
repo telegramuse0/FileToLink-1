@@ -2,446 +2,432 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#080b12">
-  <title>MovieMasalas | HD Streaming</title>
-  <meta name="description" content="Watch and download your media with MovieMasalas.">
-
-  <style>
-    :root {
-      --bg: #080b12;
-      --panel: #111722;
-      --panel-light: #182131;
-      --text: #f5f7fb;
-      --muted: #98a4b7;
-      --accent: #ff385c;
-      --accent2: #ff7448;
-      --border: rgba(255,255,255,.09);
-      --green: #39d98a;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      color: var(--text);
-      background:
-        radial-gradient(ellipse at 50% -15%, rgba(255,56,92,.19), transparent 48%),
-        var(--bg);
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
-                   "Segoe UI", sans-serif;
-    }
-
-    a { color: inherit; text-decoration: none; }
-
-    .container {
-      width: min(100% - 30px, 900px);
-      margin: 0 auto;
-    }
-
-    header {
-      padding: 21px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 21px;
-      font-weight: 850;
-      letter-spacing: -.7px;
-    }
-
-    .brand-icon {
-      display: grid;
-      place-items: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 13px;
-      color: white;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 5px 24px rgba(255,56,92,.24);
-    }
-
-    .brand span:last-child { color: var(--accent); }
-
-    .live {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      color: var(--green);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1px;
-    }
-
-    .live::before {
-      content: "";
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 10px var(--green);
-    }
-
-    main { padding: 30px 0 45px; }
-
-    .eyebrow {
-      color: var(--accent);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      margin: 9px 0 8px;
-      font-size: clamp(25px, 5vw, 38px);
-      line-height: 1.16;
-      letter-spacing: -1.1px;
-      overflow-wrap: anywhere;
-    }
-
-    .subtitle {
-      margin: 0 0 23px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.7;
-    }
-
-    .player {
-      position: relative;
-      display: grid;
-      place-items: center;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      min-height: 190px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      border-radius: 19px;
-      background:
-        radial-gradient(ellipse at center, rgba(255,56,92,.15), transparent 52%),
-        linear-gradient(145deg, #151d2b, #090c12);
-      box-shadow: 0 20px 60px rgba(0,0,0,.24);
-    }
-
-    .player-content {
-      padding: 20px;
-      text-align: center;
-    }
-
-    .play-icon {
-      display: grid;
-      place-items: center;
-      width: 66px;
-      height: 66px;
-      margin: 0 auto 15px;
-      padding-left: 4px;
-      border: 1px solid rgba(255,255,255,.35);
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 8px 35px rgba(255,56,92,.25);
-    }
-
-    .player-title {
-      margin-bottom: 7px;
-      font-size: 17px;
-      font-weight: 750;
-    }
-
-    .player-note {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.6;
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 17px;
-    }
-
-    .btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-      min-height: 51px;
-      padding: 13px 16px;
-      border: 1px solid var(--border);
-      border-radius: 13px;
-      font-size: 13px;
-      font-weight: 750;
-      text-align: center;
-      transition: transform .18s, opacity .18s;
-    }
-
-    .btn:hover { transform: translateY(-2px); }
-    .btn:active { transform: scale(.98); }
-
-    .btn-primary {
-      border: none;
-      color: white;
-      background: linear-gradient(110deg, var(--accent), var(--accent2));
-      box-shadow: 0 7px 22px rgba(255,56,92,.17);
-    }
-
-    .btn-secondary { background: var(--panel); }
-
-    .details {
-      margin-top: 23px;
-      padding: 19px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: rgba(17,23,34,.88);
-    }
-
-    .details-heading {
-      margin: 0 0 16px;
-      font-size: 14px;
-      font-weight: 800;
-    }
-
-    .detail-row {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-    }
-
-    .detail-row:last-child {
-      padding-bottom: 0;
-      border-bottom: 0;
-    }
-
-    .detail-label { color: var(--muted); }
-
-    .detail-value {
-      max-width: 68%;
-      font-weight: 650;
-      text-align: right;
-      overflow-wrap: anywhere;
-    }
-
-    .telegram-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-      margin-top: 20px;
-      padding: 19px;
-      border: 1px solid rgba(47,151,255,.23);
-      border-radius: 16px;
-      background: linear-gradient(110deg, rgba(30,136,229,.13), rgba(17,23,34,.8));
-    }
-
-    .telegram-copy { min-width: 0; }
-
-    .telegram-title {
-      margin-bottom: 5px;
-      font-size: 14px;
-      font-weight: 800;
-    }
-
-    .telegram-subtitle {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.6;
-    }
-
-    .telegram-btn {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px 15px;
-      border-radius: 11px;
-      color: white;
-      background: #168de2;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .notice {
-      margin-top: 19px;
-      padding: 14px 15px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      color: var(--muted);
-      background: rgba(255,255,255,.025);
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-    footer {
-      padding: 22px 0 28px;
-      border-top: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.8;
-      text-align: center;
-    }
-
-    footer strong { color: var(--text); }
-
-    @media (max-width: 520px) {
-      .container { width: min(100% - 22px, 900px); }
-      header { padding: 16px 0; }
-      .brand { font-size: 19px; }
-      main { padding-top: 24px; }
-      .actions { grid-template-columns: 1fr; }
-      .telegram-card { align-items: flex-start; flex-direction: column; }
-      .telegram-btn { width: 100%; }
-      .details { padding: 16px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        scroll-behavior: auto !important;
-        transition: none !important;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0b0e">
+<meta name="color-scheme" content="dark">
+<title>{{ file_name }} | MovieMasalas</title>
+<meta name="description" content="Watch and download your media with MovieMasalas.">
+<style>
+:root {
+  --bg:#09090c;
+  --surface:#121218;
+  --surface2:#191920;
+  --line:#2a2a34;
+  --red:#e50925;
+  --red2:#ff334d;
+  --text:#f8f8fa;
+  --muted:#9b9ba8;
+  --green:#35d6a0;
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  margin:0;
+  color:var(--text);
+  background:
+    radial-gradient(ellipse at 50% -15%,#461019 0,transparent 48%),
+    var(--bg);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a { color:inherit;text-decoration:none; }
+button { font:inherit; }
+button,a { -webkit-tap-highlight-color:transparent; }
+button:focus-visible,a:focus-visible {
+  outline:2px solid #ff5267;outline-offset:4px;
+}
+.container { width:min(920px,100%);margin:auto;padding:0 20px 42px; }
+header {
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;padding:23px 0;border-bottom:1px solid #ffffff12;
+}
+.brand { display:flex;align-items:center;gap:12px;min-width:0; }
+.brand-icon {
+  width:44px;height:44px;display:grid;place-items:center;flex-shrink:0;
+  border-radius:14px;background:linear-gradient(145deg,#ff304b,#a90019);
+  box-shadow:0 5px 25px #e5092530;
+}
+.brand-name { font-size:22px;font-weight:900;letter-spacing:-1px;line-height:1.1; }
+.brand-name span { color:var(--red2); }
+.brand-sub { color:var(--muted);font-size:11px;margin-top:5px;letter-spacing:1.1px; }
+.telegram {
+  display:flex;align-items:center;gap:8px;padding:11px 14px;
+  border:1px solid var(--line);border-radius:12px;
+  background:#ffffff06;font-size:13px;font-weight:700;white-space:nowrap;
+}
+.hero { padding:35px 0 18px; }
+.eyebrow {
+  color:#ff6476;font-size:11px;letter-spacing:2.4px;
+  font-weight:850;text-transform:uppercase;
+}
+h1 {
+  font-size:clamp(30px,6vw,49px);line-height:1.08;
+  letter-spacing:-1.8px;margin:13px 0;
+}
+.gradient-text {
+  background:linear-gradient(90deg,#ff354f,#ff9b82);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.intro { color:var(--muted);font-size:14px;line-height:1.8;max-width:560px;margin:0; }
+.file-card {
+  display:flex;align-items:center;gap:15px;padding:18px;
+  margin:24px 0 15px;border:1px solid var(--line);border-radius:19px;
+  background:linear-gradient(120deg,#191217,#111116);
+  box-shadow:0 14px 38px #0003;
+}
+.file-icon {
+  width:56px;height:56px;flex-shrink:0;border-radius:15px;
+  background:#e5092517;border:1px solid #e5092538;
+  display:grid;place-items:center;color:#ff5369;
+}
+.file-info { min-width:0;flex:1; }
+.label { color:var(--muted);font-size:10px;font-weight:800;letter-spacing:1.7px; }
+.filename {
+  font-size:clamp(16px,3.7vw,22px);font-weight:800;
+  overflow-wrap:anywhere;line-height:1.4;margin:6px 0;
+}
+.file-meta { color:var(--muted);font-size:12px; }
+.quality {
+  flex-shrink:0;padding:7px 9px;border:1px solid #35d6a02e;
+  background:#35d6a00e;color:#67e5b9;border-radius:8px;
+  font-size:10px;font-weight:850;letter-spacing:.7px;
+}
+.player-box {
+  padding:15px;border:1px solid var(--line);border-radius:20px;
+  background:var(--surface);margin-top:16px;
+}
+.player-top {
+  display:flex;justify-content:space-between;align-items:center;
+  gap:10px;margin:2px 2px 14px;
+}
+.player-top strong { font-size:14px; }
+.live { color:var(--green);font-size:11px;font-weight:800; }
+.video-wrap {
+  position:relative;overflow:hidden;border-radius:14px;
+  background:#000;aspect-ratio:16/9;display:grid;place-items:center;
+}
+video { width:100%;height:100%;object-fit:contain;background:#000; }
+.video-wrap video:not(.active) { display:none; }
+.video-placeholder {
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:13px;
+  background:radial-gradient(ellipse at center,#271016,#08080b 75%);
+  text-align:center;padding:20px;
+}
+.video-placeholder.hidden { display:none; }
+.big-play {
+  width:66px;height:66px;display:grid;place-items:center;
+  border:1px solid #ff526755;border-radius:50%;
+  color:white;background:linear-gradient(145deg,#ff304b,#a90019);
+  box-shadow:0 0 0 10px #e5092512,0 12px 35px #e5092540;
+  cursor:pointer;transition:transform .2s;
+}
+.big-play:hover { transform:scale(1.07); }
+.placeholder-title { font-weight:800;font-size:15px; }
+.placeholder-sub { color:var(--muted);font-size:12px;line-height:1.6; }
+.status { min-height:18px;margin:12px 3px 0;color:#ffadb8;font-size:12px;line-height:1.5; }
+.section-head {
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;margin:30px 0 13px;
+}
+.section-title { font-size:13px;font-weight:850;letter-spacing:1px; }
+.section-note { font-size:11px;color:var(--muted); }
+.apps { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px; }
+.app {
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  justify-content:center;gap:10px;min-width:0;min-height:135px;
+  padding:16px 8px;background:var(--surface);
+  border:1px solid var(--line);border-radius:16px;
+  transition:transform .2s,border-color .2s,background .2s;
+}
+.app:hover { transform:translateY(-3px);border-color:#87303b;background:#1a1116; }
+.app-icon {
+  width:47px;height:47px;border-radius:14px;
+  display:grid;place-items:center;background:var(--surface2);
+}
+.app strong { font-size:12px; }
+.app small { color:var(--muted);font-size:10px; }
+.actions { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px; }
+.btn {
+  min-height:51px;display:flex;justify-content:center;align-items:center;
+  gap:9px;padding:13px 15px;border-radius:13px;
+  font-weight:800;font-size:13px;cursor:pointer;
+  border:1px solid transparent;transition:filter .2s,transform .2s;
+}
+.btn:hover { filter:brightness(1.12); }
+.btn:active { transform:scale(.985); }
+.btn-primary {
+  color:#fff;background:linear-gradient(110deg,#f21c39,#b60720);
+  box-shadow:0 7px 22px #e5092525;
+}
+.btn-secondary { color:#f5f5f7;background:#18181f;border-color:var(--line); }
+.howto {
+  padding:19px;margin-top:25px;background:#111116;
+  border:1px solid var(--line);border-radius:17px;
+}
+.howto h2 { font-size:14px;margin:0 0 15px; }
+.step { display:flex;align-items:flex-start;gap:11px;margin-top:13px; }
+.step-num {
+  width:24px;height:24px;flex-shrink:0;border-radius:8px;
+  background:#e509251c;color:#ff6678;display:grid;place-items:center;
+  font-size:11px;font-weight:900;
+}
+.step p { margin:2px 0 0;color:var(--muted);font-size:12px;line-height:1.7; }
+footer {
+  padding:25px 0 0;text-align:center;color:#73737f;
+  font-size:11px;line-height:1.8;
+}
+footer b { color:#c9c9d2; }
+svg { display:block; }
+@media(max-width:560px) {
+  .container { padding:0 14px 30px; }
+  header { padding:18px 0; }
+  .brand-icon { width:39px;height:39px;border-radius:12px; }
+  .brand-name { font-size:19px; }
+  .brand-sub { font-size:9px;letter-spacing:.7px; }
+  .telegram { padding:10px;font-size:11px;gap:6px; }
+  .hero { padding-top:28px; }
+  .file-card { padding:14px;gap:11px; }
+  .file-icon { width:47px;height:47px; }
+  .quality { font-size:9px;padding:6px; }
+  .player-box { padding:10px; }
+  .apps { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .app { min-height:120px; }
+  .actions { grid-template-columns:1fr;gap:10px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after { scroll-behavior:auto!important;transition:none!important; }
+}
+</style>
 </head>
-
 <body>
-  <header>
-    <div class="container nav">
-      <a class="brand" href="#" aria-label="MovieMasalas home">
-        <span class="brand-icon" aria-hidden="true">
-          <svg width="23" height="23" viewBox="0 0 24 24"
-               fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="16" rx="3"/>
-            <path d="m10 9 5 3-5 3z" fill="currentColor" stroke="none"/>
-            <path d="M7 4v3M12 4v3M17 4v3M7 17v3M12 17v3M17 17v3"/>
-          </svg>
-        </span>
-        <span>Movie<span>Masalas</span></span>
-      </a>
-      <div class="live">ONLINE</div>
+<main class="container">
+
+<header>
+  <a class="brand" href="/" aria-label="MovieMasalas home">
+    <div class="brand-icon">
+      <svg width="25" height="25" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="4" y="3" width="16" height="18" rx="3" stroke="white" stroke-width="1.8"/>
+        <path d="M9 3l6 18M15 3L9 21M4 8h16M4 16h16" stroke="white" stroke-width="1.4" opacity=".65"/>
+      </svg>
     </div>
-  </header>
+    <div>
+      <div class="brand-name">Movie<span>Masalas</span></div>
+      <div class="brand-sub">YOUR ENTERTAINMENT HUB</div>
+    </div>
+  </a>
+  <a class="telegram" href="https://t.me/shoppingdeals_Discounts" target="_blank" rel="noopener noreferrer">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M21.8 4.2 18.5 20c-.25 1.12-.91 1.4-1.85.87l-5.1-3.76-2.46 2.37c-.27.27-.5.5-1.02.5l.36-5.2 9.47-8.55c.41-.36-.09-.56-.63-.2L5.56 13.42.5 11.84c-1.1-.35-1.12-1.1.23-1.62L20.5 2.6c.91-.33 1.71.22 1.3 1.6Z"/>
+    </svg>
+    Telegram
+  </a>
+</header>
 
-  <main class="container">
-    <div class="eyebrow">Your media, your way</div>
-    <h1>{{ file_name }}</h1>
-    <p class="subtitle">
-      Ready to watch? Open your media link or download the file to your device.
-    </p>
+<section class="hero">
+  <div class="eyebrow">MOVIEMASALAS STREAMING</div>
+  <h1>Your movie.<br><span class="gradient-text">Your way to watch.</span></h1>
+  <p class="intro">Enjoy your media with a clean viewing experience. Play in your browser, try a compatible player app, or download the file.</p>
+</section>
 
-    <section class="player" aria-label="Media information">
-      <div class="player-content">
-        <div class="play-icon" aria-hidden="true">
-          <svg width="28" height="28" viewBox="0 0 24 24"
-               fill="white">
-            <path d="M8 5.5v13L19 12z"/>
-          </svg>
-        </div>
-        <div class="player-title">Ready to Stream</div>
-        <div class="player-note">
-          Your media link is ready.<br>
-          Tap Watch Online to open it.
-        </div>
-      </div>
-    </section>
+<section class="file-card">
+  <div class="file-icon">
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/>
+      <path d="m10 8 6 4-6 4V8Z" fill="currentColor"/>
+    </svg>
+  </div>
+  <div class="file-info">
+    <div class="label">YOUR MEDIA FILE</div>
+    <div class="filename">{{ file_name }}</div>
+    <div class="file-meta">{{ file_size }} · Ready to open</div>
+  </div>
+  <span class="quality">MEDIA</span>
+</section>
 
-    <div class="actions">
-      <a class="btn btn-primary" href="{{ file_url }}"
-         target="_blank" rel="noopener noreferrer">
-        <svg width="19" height="19" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2"
-             aria-hidden="true">
-          <path d="m8 5 12 7-12 7z" fill="currentColor"/>
+<section class="player-box">
+  <div class="player-top">
+    <strong>Browser Player</strong>
+    <span class="live">● PLAYER</span>
+  </div>
+
+  <div class="video-wrap">
+    <video id="video" controls playsinline preload="metadata"></video>
+    <div class="video-placeholder" id="placeholder">
+      <button class="big-play" id="playButton" type="button" aria-label="Start playback">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M8 5.8c0-.8.9-1.3 1.6-.9l10 6.2a1.1 1.1 0 0 1 0 1.8l-10 6.2c-.7.4-1.6-.1-1.6-.9V5.8Z"/>
         </svg>
-        Watch Online
-      </a>
-
-      <a class="btn btn-secondary" href="{{ file_url }}"
-         download>
-        <svg width="19" height="19" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round"
-             aria-hidden="true">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <path d="m7 10 5 5 5-5M12 15V3"/>
-        </svg>
-        Download File
-      </a>
+      </button>
+      <div class="placeholder-title">Ready when you are</div>
+      <div class="placeholder-sub">Press play to try browser playback.<br>Compatibility depends on the file format.</div>
     </div>
+  </div>
+  <div class="status" id="status" role="status" aria-live="polite"></div>
+</section>
 
-    <section class="details">
-      <h2 class="details-heading">File Information</h2>
+<div class="section-head">
+  <div class="section-title">OPEN WITH A PLAYER</div>
+  <div class="section-note">Choose your app</div>
+</div>
 
-      <div class="detail-row">
-        <span class="detail-label">File Name</span>
-        <span class="detail-value">{{ file_name }}</span>
-      </div>
+<div class="apps">
+  <a class="app" id="vlc" href="#">
+    <span class="app-icon" style="color:#ffb44d">
+      <svg width="27" height="27" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="m9 3 6 0 1.3 4H7.7L9 3Zm-2 6h10l1.2 4H5.8L7 9Zm-2 6h14l1.3 4H3.7L5 15Z" fill="currentColor"/>
+        <path d="M3 21h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <strong>VLC Player</strong><small>Open external player</small>
+  </a>
 
-      <div class="detail-row">
-        <span class="detail-label">File Size</span>
-        <span class="detail-value">{{ file_size }}</span>
-      </div>
+  <a class="app" id="mx" href="#">
+    <span class="app-icon" style="color:#69a6ff">
+      <svg width="27" height="27" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="16" rx="4" stroke="currentColor" stroke-width="1.8"/>
+        <path d="m10 8 6 4-6 4V8Z" fill="currentColor"/>
+      </svg>
+    </span>
+    <strong>MX Player</strong><small>Android app</small>
+  </a>
 
-      <div class="detail-row">
-        <span class="detail-label">Platform</span>
-        <span class="detail-value">MovieMasalas</span>
-      </div>
+  <a class="app" id="playit" href="#">
+    <span class="app-icon" style="color:#c5a0ff">
+      <svg width="27" height="27" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+        <path d="m10 8 6 4-6 4V8Z" fill="currentColor"/>
+      </svg>
+    </span>
+    <strong>PLAYit</strong><small>Android app</small>
+  </a>
 
-      <div class="detail-row">
-        <span class="detail-label">Status</span>
-        <span class="detail-value" style="color:var(--green)">
-          Link Ready
-        </span>
-      </div>
-    </section>
+  <a class="app" id="just" href="#">
+    <span class="app-icon" style="color:#54dfb2">
+      <svg width="27" height="27" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M9 9v6l6-3-6-3Z" fill="currentColor"/>
+      </svg>
+    </span>
+    <strong>Just Player</strong><small>Android app</small>
+  </a>
+</div>
 
-    <section class="telegram-card">
-      <div class="telegram-copy">
-        <div class="telegram-title">Join MovieMasalas on Telegram</div>
-        <div class="telegram-subtitle">
-          Visit our Telegram channel for updates and announcements.
-        </div>
-      </div>
+<div class="actions">
+  <button class="btn btn-secondary" id="copyButton" type="button">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" stroke="currentColor" stroke-width="1.8"/>
+    </svg>
+    Copy Stream Link
+  </button>
 
-      <a class="telegram-btn"
-         href="https://t.me/shoppingdeals_Discounts"
-         target="_blank"
-         rel="noopener noreferrer">
-        <svg width="18" height="18" viewBox="0 0 24 24"
-             fill="currentColor" aria-hidden="true">
-          <path d="M21.9 3.6 18.7 20c-.2 1.2-.9 1.5-1.8 1l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.3-8.4c.4-.4-.1-.6-.6-.2L6.1 13.7l-5-1.6c-1.1-.3-1.1-1.1.2-1.6L20.8 2.7c.9-.3 1.6.2 1.1.9Z"/>
-        </svg>
-        Join Telegram
-      </a>
-    </section>
+  <a class="btn btn-primary" href="{{ file_url }}" id="downloadButton" download>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Download File
+  </a>
+</div>
 
-    <div class="notice">
-      <strong>Note:</strong> Playback and download availability depend on
-      your media server and browser. If a link does not open, try opening
-      it in another browser or use the download option.
-    </div>
-  </main>
+<section class="howto">
+  <h2>How to watch</h2>
+  <div class="step"><span class="step-num">1</span><p>Press the play button to try streaming in your browser.</p></div>
+  <div class="step"><span class="step-num">2</span><p>If playback is unsupported, try a compatible external media player.</p></div>
+  <div class="step"><span class="step-num">3</span><p>You can also copy the stream URL or download the file.</p></div>
+</section>
 
-  <footer>
-    <div class="container">
-      Powered by <strong>MovieMasalas</strong><br>
-      Please access and share only content you are authorized to use.
-    </div>
-  </footer>
+<footer>
+  <b>MovieMasalas</b> · Made for your media experience<br>
+  Playback and external app support depend on your device and file format.
+</footer>
+
+</main>
+
+<script>
+const mediaUrl = {{ file_url | tojson }};
+const video = document.getElementById('video');
+const placeholder = document.getElementById('placeholder');
+const statusBox = document.getElementById('status');
+
+function showStatus(message) {
+  statusBox.textContent = message;
+}
+
+document.getElementById('playButton').addEventListener('click', async () => {
+  video.src = mediaUrl;
+  placeholder.classList.add('hidden');
+  video.classList.add('active');
+
+  try {
+    await video.play();
+    showStatus('');
+  } catch (error) {
+    showStatus(
+      'Playback could not start automatically. Try the play control or use a compatible external player.'
+    );
+  }
+});
+
+video.addEventListener('error', () => {
+  showStatus(
+    'Browser playback is not supported for this file or stream. Try an external player or download it.'
+  );
+});
+
+document.getElementById('copyButton').addEventListener('click', async () => {
+  const url = new URL(mediaUrl, location.href).href;
+
+  try {
+    await navigator.clipboard.writeText(url);
+    showStatus('Stream link copied successfully.');
+  } catch (error) {
+    const field = document.createElement('textarea');
+    field.value = url;
+    field.style.position = 'fixed';
+    field.style.opacity = '0';
+    document.body.appendChild(field);
+    field.select();
+
+    try {
+      const copied = document.execCommand('copy');
+      showStatus(copied ? 'Stream link copied.' : 'Copy unavailable. Copy the page URL manually.');
+    } catch (copyError) {
+      showStatus('Copy unavailable. Copy the page URL manually.');
+    }
+
+    field.remove();
+  }
+});
+
+const absoluteUrl = new URL(mediaUrl, location.href);
+const externalUrl = absoluteUrl.href.replace(/^https?:\/\//, '');
+
+document.getElementById('vlc').href = 'vlc://' + externalUrl;
+
+function makeAndroidIntent(packageName) {
+  return 'intent://' + externalUrl +
+    '#Intent;scheme=' + absoluteUrl.protocol.slice(0, -1) +
+    ';type=video/*;package=' + packageName + ';end';
+}
+
+document.getElementById('mx').href =
+  makeAndroidIntent('com.mxtech.videoplayer.ad');
+
+document.getElementById('playit').href =
+  makeAndroidIntent('com.playit.videoplayer');
+
+document.getElementById('just').href =
+  makeAndroidIntent('com.brouken.player');
+
+for (const id of ['vlc', 'mx', 'playit', 'just']) {
+  document.getElementById(id).addEventListener('click', () => {
+    showStatus(
+      'If the app does not open, it may not be installed or may not support this link.'
+    );
+  });
+}
+</script>
 </body>
 </html>
