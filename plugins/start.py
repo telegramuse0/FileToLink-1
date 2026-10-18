@@ -8,7 +8,9 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from Script import script
 from info import URL, LOG_CHANNEL, SHORTLINK
-from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
+from TechVJ.util.file_properties import (
+    get_name, get_hash, get_media_file_size
+)
 from TechVJ.util.human_readable import humanbytes
 from database.users_chats_db import db
 from utils import temp, get_shortlink
@@ -38,9 +40,7 @@ async def is_subscribed(client, user_id):
 
 def join_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton(
-            "📢 Join Channel", url=CHANNEL_URL
-        )],
+        [InlineKeyboardButton("📢 Join Channel", url=CHANNEL_URL)],
         [InlineKeyboardButton(
             "✅ I've Joined — Check Again",
             callback_data="check_subscription"
@@ -88,97 +88,143 @@ async def check_subscription(client, query):
 
 
 def get_source_details(message):
-    """Telegram message se available forwarding metadata."""
+    """Available forwarding source details and clickable links."""
     details = []
 
     chat = getattr(message, "forward_from_chat", None)
-    user = getattr(message, "forward_from", None)
     message_id = getattr(message, "forward_from_message_id", None)
+    user = getattr(message, "forward_from", None)
     sender_name = getattr(message, "forward_sender_name", None)
     forward_date = getattr(message, "forward_date", None)
 
-    # Newer Pyrogram versions may expose forward_origin
+    # Support for newer Telegram/Pyrogram forward metadata
     origin = getattr(message, "forward_origin", None)
 
     if chat:
-        details.append(
-            f"<b>Forward channel:</b> {esc(chat.title)}"
-        )
+        title = esc(getattr(chat, "title", "Forward channel"))
+        username = getattr(chat, "username", None)
+        source_link = None
 
-        if getattr(chat, "username", None):
-            source_url = f"https://t.me/{chat.username}"
+        if username:
+            if message_id:
+                source_link = (
+                    f"https://t.me/{username}/{message_id}"
+                )
+            else:
+                source_link = f"https://t.me/{username}"
+
+        elif message_id:
+            # Private channel message link. The viewer must have access.
+            chat_id = str(chat.id)
+            if chat_id.startswith("-100"):
+                internal_id = chat_id[4:]
+                source_link = (
+                    f"https://t.me/c/{internal_id}/{message_id}"
+                )
+
+        if source_link:
             details.append(
-                f'<b>Channel link:</b> <a href="{source_url}">'
-                f'Open channel</a>'
+                f'<b>Forward channel:</b> '
+                f'<a href="{esc(source_link)}">{title}</a>'
+            )
+        else:
+            details.append(
+                f"<b>Forward channel:</b> {title}"
+            )
+            details.append(
+                "<i>Source link unavailable from Telegram metadata.</i>"
             )
 
-            if message_id:
-                post_url = f"{source_url}/{message_id}"
-                details.append(
-                    f'<b>Original post:</b> <a href="{post_url}">'
-                    f'Open post</a>'
-                )
-        elif message_id:
+        if message_id:
             details.append(
                 f"<b>Original message ID:</b> {message_id}"
             )
 
     elif user:
-        full_name = " ".join(filter(None, [
+        full_name = esc(" ".join(filter(None, [
             user.first_name, user.last_name
-        ]))
-        details.append(
-            f"<b>Forwarded user:</b> {esc(full_name)}"
-        )
+        ])) or "Unknown")
+
+        details.append(f"<b>Forwarded user:</b> {full_name}")
         details.append(
             f"<b>Source user ID:</b> <code>{user.id}</code>"
         )
+
         if user.username:
             details.append(
-                f"<b>Source username:</b> @{esc(user.username)}"
+                f'<b>Source profile:</b> '
+                f'<a href="https://t.me/{user.username}">'
+                f'@{esc(user.username)}</a>'
+            )
+
+    elif origin:
+        # Metadata format used by some newer Pyrogram versions
+        origin_chat = getattr(origin, "chat", None)
+        origin_user = getattr(origin, "sender_user", None)
+        origin_message_id = getattr(origin, "message_id", None)
+
+        if origin_chat:
+            title = esc(
+                getattr(origin_chat, "title", "Forward channel")
+            )
+            username = getattr(origin_chat, "username", None)
+            link = None
+
+            if username:
+                link = f"https://t.me/{username}"
+                if origin_message_id:
+                    link += f"/{origin_message_id}"
+            elif origin_message_id:
+                chat_id = str(origin_chat.id)
+                if chat_id.startswith("-100"):
+                    link = (
+                        f"https://t.me/c/{chat_id[4:]}/"
+                        f"{origin_message_id}"
+                    )
+
+            if link:
+                details.append(
+                    f'<b>Forward channel:</b> '
+                    f'<a href="{esc(link)}">{title}</a>'
+                )
+            else:
+                details.append(
+                    f"<b>Forward channel:</b> {title}"
+                )
+
+            if origin_message_id:
+                details.append(
+                    f"<b>Original message ID:</b> "
+                    f"{origin_message_id}"
+                )
+
+        elif origin_user:
+            name = esc(" ".join(filter(None, [
+                origin_user.first_name,
+                origin_user.last_name
+            ])) or "Unknown")
+            details.append(f"<b>Forwarded user:</b> {name}")
+            details.append(
+                f"<b>Source user ID:</b> "
+                f"<code>{origin_user.id}</code>"
+            )
+        else:
+            details.append(
+                "<b>Forward source:</b> Telegram metadata available "
+                "but no public source link"
             )
 
     elif sender_name:
         details.append(
-            f"<b>Forward source name:</b> {esc(sender_name)}"
+            f"<b>Forward source:</b> {esc(sender_name)}"
         )
         details.append(
-            "<i>Telegram ne source ki ID hide ki hai.</i>"
+            "<i>Telegram has hidden the original source identity.</i>"
         )
-
-    elif origin:
-        # ForwardOrigin is available in some Pyrogram versions.
-        origin_type = getattr(origin, "type", None)
-        details.append(
-            f"<b>Forward origin type:</b> {esc(origin_type or 'Available')}"
-        )
-        origin_chat = getattr(origin, "chat", None)
-        origin_user = getattr(origin, "sender_user", None)
-
-        if origin_chat:
-            details.append(
-                f"<b>Origin chat:</b> {esc(getattr(origin_chat, 'title', 'Channel'))}"
-            )
-            origin_username = getattr(origin_chat, "username", None)
-            origin_msg_id = getattr(origin, "message_id", None)
-            if origin_username:
-                details.append(
-                    f"<b>Origin channel:</b> https://t.me/{esc(origin_username)}"
-                )
-                if origin_msg_id:
-                    details.append(
-                        f"<b>Origin post:</b> "
-                        f"https://t.me/{esc(origin_username)}/{origin_msg_id}"
-                    )
-
-        if origin_user:
-            details.append(
-                f"<b>Origin user ID:</b> {origin_user.id}"
-            )
 
     else:
         details.append(
-            "Direct upload / Telegram source metadata unavailable"
+            "<b>Forward source:</b> Direct upload or unavailable"
         )
 
     if forward_date:
@@ -208,7 +254,7 @@ async def start(client, message):
                 script.LOG_TEXT_P.format(user.id, user.mention)
             )
         except Exception as e:
-            print(f"New-user log error: {e}")
+            print(f"New user log error: {e}")
 
     await client.send_message(
         user.id,
@@ -244,21 +290,21 @@ async def stream_start(client, message):
     original_name = getattr(media, "file_name", None) or "Unknown"
     size = humanize.naturalsize(media.file_size)
 
-    # File ko LOG_CHANNEL mein copy karein
+    # Copy the file into LOG_CHANNEL
     try:
         log_msg = await client.send_cached_media(
             chat_id=LOG_CHANNEL,
             file_id=media.file_id
         )
     except Exception as e:
-        print(f"File copy to LOG_CHANNEL failed: {e}")
+        print(f"File log error: {e}")
         await message.reply_text(
             "❌ File log channel mein copy nahi ho saki. "
             "Bot permissions aur LOG_CHANNEL setting check karein."
         )
         return
 
-    # URLs existing project logic se banayein
+    # Generate URLs using existing project functions
     try:
         file_name = get_name(log_msg)
 
@@ -276,13 +322,13 @@ async def stream_start(client, message):
             download_url = await get_shortlink(download_url)
 
     except Exception as e:
-        print(f"Link generation failed: {e}")
+        print(f"Link generation error: {e}")
         await message.reply_text(
             "❌ Link generate nahi hua. Server/shortlink settings check karein."
         )
         return
 
-    # Screenshot jaisa caption + extra source logging
+    # Log user, file, source and generated links
     caption = (
         f"•• Link generated for ID #{user.id}\n"
         f"•• Username: {esc(username)}\n"
@@ -297,7 +343,6 @@ async def stream_start(client, message):
         f"<b>🖥 Watch Online:</b>\n{esc(stream_url)}"
     )
 
-    # Log details ko copied file ke neeche post karein
     try:
         await log_msg.reply_text(
             caption,
@@ -314,9 +359,9 @@ async def stream_start(client, message):
             ]])
         )
     except Exception as e:
-        print(f"Log details post failed: {e}")
+        print(f"Log details error: {e}")
 
-    # User ko links
+    # Send generated links to the user
     await message.reply_text(
         text=(
             "<b>✅ Your Link Is Generated!</b>\n\n"
