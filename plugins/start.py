@@ -336,8 +336,6 @@ async def stream_start(client, message):
         f"•• File size: {esc(size)}\n"
         f"<b>📤 Source details</b>\n"
         f"{get_source_details(message)}\n\n"
-        f"<b>🚀 Fast Download:</b>\n{esc(download_url)}\n\n"
-        f"<b>🖥 Watch Online:</b>\n{esc(stream_url)}"
     )
 
     try:
