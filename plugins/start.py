@@ -192,12 +192,6 @@ def get_source_details(message):
                     f"<b>Forward channel:</b> {title}"
                 )
 
-            if origin_message_id:
-                details.append(
-                    f"<b>Original message ID:</b> "
-                    f"{origin_message_id}"
-                )
-
         elif origin_user:
             name = esc(" ".join(filter(None, [
                 origin_user.first_name,
@@ -225,11 +219,6 @@ def get_source_details(message):
     else:
         details.append(
             "<b>Forward source:</b> Direct upload or unavailable"
-        )
-
-    if forward_date:
-        details.append(
-            f"<b>Forward date:</b> {esc(forward_date)}"
         )
 
     return "\n".join(details)
