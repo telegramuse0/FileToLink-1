@@ -2,7 +2,7 @@
 # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-import re, math, logging, secrets, mimetypes, time
+import re, math, logging, secrets, mimetypes, time, asyncio
 from info import *
 from aiohttp import web
 from aiohttp.http_exceptions import BadStatusLine
@@ -63,48 +63,105 @@ async def stream_handler(request: web.Request):
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
 
-class_cache = {}
+class_cacasync def media_streamer(request: web.Request, id: int, secure_hash: str):
+    range_header = request.headers.get("Range")
 
-async def media_streamer(request: web.Request, id: int, secure_hash: str):
-    range_header = request.headers.get("Range", 0)
-    
     index = min(work_loads, key=work_loads.get)
     faster_client = multi_clients[index]
-    
+
     if MULTI_CLIENT:
         logging.info(f"Client {index} is now serving {request.remote}")
 
     if faster_client in class_cache:
         tg_connect = class_cache[faster_client]
-        logging.debug(f"Using cached ByteStreamer object for client {index}")
     else:
-        logging.debug(f"Creating new ByteStreamer object for client {index}")
         tg_connect = ByteStreamer(faster_client)
         class_cache[faster_client] = tg_connect
-    logging.debug("before calling get_file_properties")
+
     file_id = await tg_connect.get_file_properties(id)
-    logging.debug("after calling get_file_properties")
-    
-    if file_id.unique_id[:6] != secure_hash:
-        logging.debug(f"Invalid hash for message with ID {id}")
+    if not secure_hash or file_id.unique_id[:6] != secure_hash:
         raise InvalidHash
-    
+
     file_size = file_id.file_size
+    if not file_size:
+        raise web.HTTPNotFound(text="Empty media file")
 
+    # Parse a single HTTP byte range (including open-ended and suffix ranges).
+    from_bytes, until_bytes = 0, file_size - 1
+    is_partial = False
     if range_header:
-        from_bytes, until_bytes = range_header.replace("bytes=", "").split("-")
-        from_bytes = int(from_bytes)
-        until_bytes = int(until_bytes) if until_bytes else file_size - 1
-    else:
-        from_bytes = request.http_range.start or 0
-        until_bytes = (request.http_range.stop or file_size) - 1
+        match = re.fullmatch(r"bytes=(\d*)-(\d*)", range_header.strip())
+        if not match or (not match.group(1) and not match.group(2)):
+            raise web.HTTPRequestRangeNotSatisfiable(
+                headers={"Content-Range": f"bytes */{file_size}"}
+            )
+        first, last = match.groups()
+        if not first:
+            suffix_length = int(last)
+            if suffix_length <= 0:
+                raise web.HTTPRequestRangeNotSatisfiable(
+                    headers={"Content-Range": f"bytes */{file_size}"}
+                )
+            from_bytes = max(0, file_size - suffix_length)
+        else:
+            from_bytes = int(first)
+            until_bytes = int(last) if last else file_size - 1
+        if from_bytes >= file_size or until_bytes < from_bytes:
+            raise web.HTTPRequestRangeNotSatisfiable(
+                headers={"Content-Range": f"bytes */{file_size}"}
+            )
+        until_bytes = min(until_bytes, file_size - 1)
+        is_partial = True
 
-    if (until_bytes > file_size) or (from_bytes < 0) or (until_bytes < from_bytes):
-        return web.Response(
-            status=416,
-            body="416: Range not satisfiable",
-            headers={"Content-Range": f"bytes */{file_size}"},
-        )
+    chunk_size = 1024 * 1024
+    offset = (from_bytes // chunk_size) * chunk_size
+    first_part_cut = from_bytes - offset
+    last_part_cut = (until_bytes % chunk_size) + 1
+    req_length = until_bytes - from_bytes + 1
+    # Inclusive chunk count: avoids a zero/short stream at exact chunk boundaries.
+    part_count = ((until_bytes // chunk_size) - (offset // chunk_size)) + 1
+
+    mime_type = file_id.mime_type or mimetypes.guess_type(file_id.file_name or "")[0]
+    mime_type = mime_type or "application/octet-stream"
+    file_name = file_id.file_name or f"{secrets.token_hex(4)}.bin"
+    safe_name = file_name.replace('"', "'").replace("\\", "_")
+    disposition = "inline" if mime_type.startswith(("video/", "audio/")) else "attachment"
+
+    headers = {
+        "Content-Type": mime_type,
+        "Content-Length": str(req_length),
+        "Content-Disposition": f'{disposition}; filename="{safe_name}"',
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff",
+    }
+    if is_partial:
+        headers["Content-Range"] = f"bytes {from_bytes}-{until_bytes}/{file_size}"
+
+    response = web.StreamResponse(
+        status=206 if is_partial else 200,
+        headers=headers,
+    )
+    await response.prepare(request)
+
+    # HEAD requests need headers only; GET streams Telegram chunks progressively.
+    if request.method == "HEAD":
+        return response
+
+    body = tg_connect.yield_file(
+        file_id, index, offset, first_part_cut, last_part_cut, part_count, chunk_size
+    )
+    try:
+        async for chunk in body:
+            if chunk:
+                await response.write(chunk)
+        await response.write_eof()
+    except (ConnectionResetError, asyncio.CancelledError):
+        logging.info("Client disconnected while streaming message %s", id)
+        raise
+
+    return response
+       )
 
     chunk_size = 1024 * 1024
     until_bytes = min(until_bytes, file_size - 1)
