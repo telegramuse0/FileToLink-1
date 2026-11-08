@@ -1,6 +1,6 @@
 import sys, glob, importlib, logging, logging.config, pytz, asyncio
 from pathlib import Path
-import signal
+import signal, time
 
 # Get logging configurations
 logging.config.fileConfig('logging.conf')
@@ -14,7 +14,8 @@ logging.basicConfig(
 logging.getLogger("aiohttp").setLevel(logging.ERROR)
 logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
 
-from pyrogram import Client, idle 
+from pyrogram import Client, idle
+from pyrogram.errors import FloodWait 
 from database.users_chats_db import db
 from info import *
 from utils import temp
@@ -30,7 +31,23 @@ from TechVJ.bot.clients import initialize_clients
 
 ppath = "plugins/*.py"
 files = glob.glob(ppath)
-TechVJBot.start()
+start_bot_with_floodwait_retry()
+
+def start_bot_with_floodwait_retry(max_retries=3):
+    """Wait for Telegram's rate-limit window instead of crashing on startup."""
+    for attempt in range(1, max_retries + 1):
+        try:
+            return TechVJBot.start()
+        except FloodWait as error:
+            wait_seconds = max(1, int(getattr(error, "value", 30))) + 2
+            logging.warning(
+                "Telegram FloodWait during bot login. Waiting %s seconds before retry %s/%s.",
+                wait_seconds, attempt, max_retries
+            )
+            if attempt >= max_retries:
+                raise
+            time.sleep(wait_seconds)
+
 
 async def start():
     print('\n')
