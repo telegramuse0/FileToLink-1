@@ -18,11 +18,10 @@ async def render_page(id, secure_hash, src=None):
         raise InvalidHash
 
     file_name = file_data.file_name or f"media_{id}"
-    mime_type = (
-        file_data.mime_type
-        or mimetypes.guess_type(file_name)[0]
-        or "application/octet-stream"
-    )
+    guessed_mime = mimetypes.guess_type(file_name)[0]
+    mime_type = file_data.mime_type or ""
+    if not mime_type or mime_type == "application/octet-stream":
+        mime_type = guessed_mime or mime_type or "application/octet-stream"
     if mime_type == "application/octet-stream":
         logging.warning("Unknown media MIME type for message %s (%s)", id, file_name)
 
