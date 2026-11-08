@@ -35,7 +35,7 @@ async def stream_handler(request: web.Request):
         raise web.HTTPForbidden(text=e.message)
     except FIleNotFound as e:
         raise web.HTTPNotFound(text=e.message)
-    except (AttributeError, BadStatusLine, ConnectionResetError):
+    except (BadStatusLine, ConnectionResetError):
         pass
     except Exception as e:
         logging.critical(e.with_traceback(None))
@@ -57,7 +57,7 @@ async def stream_handler(request: web.Request):
         raise web.HTTPForbidden(text=e.message)
     except FIleNotFound as e:
         raise web.HTTPNotFound(text=e.message)
-    except (AttributeError, BadStatusLine, ConnectionResetError):
+    except (BadStatusLine, ConnectionResetError):
         pass
     except Exception as e:
         logging.critical(e.with_traceback(None))
