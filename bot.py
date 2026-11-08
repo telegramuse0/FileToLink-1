@@ -31,8 +31,6 @@ from TechVJ.bot.clients import initialize_clients
 
 ppath = "plugins/*.py"
 files = glob.glob(ppath)
-start_bot_with_floodwait_retry()
-
 def start_bot_with_floodwait_retry(max_retries=3):
     """Wait for Telegram's rate-limit window instead of crashing on startup."""
     for attempt in range(1, max_retries + 1):
@@ -48,6 +46,8 @@ def start_bot_with_floodwait_retry(max_retries=3):
                 raise
             time.sleep(wait_seconds)
 
+
+start_bot_with_floodwait_retry()
 
 async def start():
     print('\n')
