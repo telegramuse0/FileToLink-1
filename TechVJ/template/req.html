@@ -569,7 +569,8 @@ document.getElementById('copyButton').addEventListener('click', async () => {
 const absoluteUrl = new URL(mediaUrl, location.href);
 const externalUrl = absoluteUrl.href.replace(/^https?:\/\//, '');
 
-document.getElementById('vlc').href = 'vlc://' + externalUrl;
+document.getElementById('vlc').href =
+  makeAndroidIntent('org.videolan.vlc');
 
 function makeAndroidIntent(packageName) {
   return 'intent://' + externalUrl +
