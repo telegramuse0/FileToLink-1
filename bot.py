@@ -57,7 +57,7 @@ async def start():
     app = web.AppRunner(await web_server())
     await app.setup()
     bind_address = "0.0.0.0"
-    await web.TCPSite(app, bind_address, PORT).start()
+    await web.TCPSite(app, bind_address, int(PORT)).start()
     logging.info("HTTP server listening on %s:%s", bind_address, PORT)
 
     print('Connecting Telegram bot')
