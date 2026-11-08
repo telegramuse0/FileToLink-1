@@ -70,29 +70,6 @@ h1 {
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
 .intro { color:var(--muted);font-size:14px;line-height:1.8;max-width:560px;margin:0; }
-.file-card {
-  display:flex;align-items:center;gap:15px;padding:18px;
-  margin:24px 0 15px;border:1px solid var(--line);border-radius:19px;
-  background:linear-gradient(120deg,#191217,#111116);
-  box-shadow:0 14px 38px #0003;
-}
-.file-icon {
-  width:56px;height:56px;flex-shrink:0;border-radius:15px;
-  background:#e5092517;border:1px solid #e5092538;
-  display:grid;place-items:center;color:#ff5369;
-}
-.file-info { min-width:0;flex:1; }
-.label { color:var(--muted);font-size:10px;font-weight:800;letter-spacing:1.7px; }
-.filename {
-  font-size:clamp(16px,3.7vw,22px);font-weight:800;
-  overflow-wrap:anywhere;line-height:1.4;margin:6px 0;
-}
-.file-meta { color:var(--muted);font-size:12px; }
-.quality {
-  flex-shrink:0;padding:7px 9px;border:1px solid #35d6a02e;
-  background:#35d6a00e;color:#67e5b9;border-radius:8px;
-  font-size:10px;font-weight:850;letter-spacing:.7px;
-}
 .player-box {
   padding:15px;border:1px solid var(--line);border-radius:20px;
   background:var(--surface);margin-top:16px;
@@ -133,7 +110,7 @@ video { width:100%;height:100%;object-fit:contain;background:#000; }
 }
 .section-title { font-size:13px;font-weight:850;letter-spacing:1px; }
 .section-note { font-size:11px;color:var(--muted); }
-.apps { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px; }
+.apps { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px; }
 .app {
   display:flex;flex-direction:column;align-items:center;text-align:center;
   justify-content:center;gap:10px;min-width:0;min-height:135px;
@@ -188,9 +165,6 @@ svg { display:block; }
   .brand-sub { font-size:9px;letter-spacing:.7px; }
   .telegram { padding:10px;font-size:11px;gap:6px; }
   .hero { padding-top:28px; }
-  .file-card { padding:14px;gap:11px; }
-  .file-icon { width:47px;height:47px; }
-  .quality { font-size:9px;padding:6px; }
   .player-box { padding:10px; }
   .apps { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .app { min-height:120px; }
@@ -229,21 +203,6 @@ svg { display:block; }
   <div class="eyebrow">MOVIEMASALAS STREAMING</div>
   <h1>Your movie.<br><span class="gradient-text">Your way to watch.</span></h1>
   <p class="intro">Enjoy your media with a clean viewing experience. Play in your browser, try a compatible player app, or download the file.</p>
-</section>
-
-<section class="file-card">
-  <div class="file-icon">
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/>
-      <path d="m10 8 6 4-6 4V8Z" fill="currentColor"/>
-    </svg>
-  </div>
-  <div class="file-info">
-    <div class="label">YOUR MEDIA FILE</div>
-    <div class="filename">{{ file_name }}</div>
-    <div class="file-meta">{{ file_size }} · Ready to open</div>
-  </div>
-  <span class="quality">MEDIA</span>
 </section>
 
 <section class="player-box">
@@ -293,25 +252,6 @@ svg { display:block; }
     <strong>MX Player</strong><small>Android app</small>
   </a>
 
-  <a class="app" id="playit" href="#">
-    <span class="app-icon" style="color:#c5a0ff">
-      <svg width="27" height="27" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
-        <path d="m10 8 6 4-6 4V8Z" fill="currentColor"/>
-      </svg>
-    </span>
-    <strong>PLAYit</strong><small>Android app</small>
-  </a>
-
-  <a class="app" id="just" href="#">
-    <span class="app-icon" style="color:#54dfb2">
-      <svg width="27" height="27" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M9 9v6l6-3-6-3Z" fill="currentColor"/>
-      </svg>
-    </span>
-    <strong>Just Player</strong><small>Android app</small>
-  </a>
 </div>
 
 <div class="actions">
@@ -415,13 +355,7 @@ function makeAndroidIntent(packageName) {
 document.getElementById('mx').href =
   makeAndroidIntent('com.mxtech.videoplayer.ad');
 
-document.getElementById('playit').href =
-  makeAndroidIntent('com.playit.videoplayer');
-
-document.getElementById('just').href =
-  makeAndroidIntent('com.brouken.player');
-
-for (const id of ['vlc', 'mx', 'playit', 'just']) {
+for (const id of ['vlc', 'mx']) {
   document.getElementById(id).addEventListener('click', () => {
     showStatus(
       'If the app does not open, it may not be installed or may not support this link.'
