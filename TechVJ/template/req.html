@@ -512,33 +512,71 @@ footer b { color:#ff435a; }
 
 <script>
 const mediaUrl = {{ file_url | tojson }};
+const mediaType = {{ mime_type | tojson }};
 const video = document.getElementById('video');
 const placeholder = document.getElementById('placeholder');
 const statusBox = document.getElementById('status');
+const playButton = document.getElementById('playButton');
 
 function showStatus(message) {
   statusBox.textContent = message;
 }
 
-document.getElementById('playButton').addEventListener('click', async () => {
+function restorePlayer(message) {
+  video.pause();
+  video.classList.remove('active');
+  video.removeAttribute('src');
+  video.load();
+  placeholder.classList.remove('hidden');
+  showStatus(message);
+}
+
+playButton.addEventListener('click', async () => {
   video.src = mediaUrl;
-  placeholder.classList.add('hidden');
   video.classList.add('active');
+  placeholder.classList.add('hidden');
+  video.load();
+
+  if (mediaType && !video.canPlayType(mediaType)) {
+    showStatus('This browser may not support this video format (' + mediaType + '). Try VLC or download the file.');
+  } else {
+    showStatus('Loading video…');
+  }
 
   try {
     await video.play();
-    showStatus('');
   } catch (error) {
-    showStatus(
-      'Playback could not start automatically. Try the play control or use a compatible external player.'
-    );
+    const message = error && error.name === 'NotAllowedError'
+      ? 'Tap the play control once more to start playback.'
+      : 'Playback could not start. Check your connection or try VLC / download.';
+    restorePlayer(message);
   }
 });
 
+video.addEventListener('loadedmetadata', () => {
+  showStatus('');
+});
+
+video.addEventListener('playing', () => {
+  showStatus('');
+});
+
+video.addEventListener('waiting', () => {
+  showStatus('Buffering video…');
+});
+
+video.addEventListener('stalled', () => {
+  showStatus('The stream has paused while waiting for data. Check the connection and try again.');
+});
+
 video.addEventListener('error', () => {
-  showStatus(
-    'Browser playback is not supported for this file or stream. Try an external player or download it.'
-  );
+  const code = video.error ? video.error.code : 0;
+  const message = code === 4
+    ? 'This browser cannot decode this video format. Try VLC or download the file.'
+    : code === 2
+      ? 'Network error while loading the video. Please try again.'
+      : 'The video stream could not be played. Try VLC or download the file.';
+  restorePlayer(message);
 });
 
 document.getElementById('copyButton').addEventListener('click', async () => {
