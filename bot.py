@@ -1,6 +1,6 @@
 import sys, glob, importlib, logging, logging.config, pytz, asyncio
 from pathlib import Path
-import signal, time
+import signal
 
 # Get logging configurations
 logging.config.fileConfig('logging.conf')
@@ -31,11 +31,13 @@ from TechVJ.bot.clients import initialize_clients
 
 ppath = "plugins/*.py"
 files = glob.glob(ppath)
-def start_bot_with_floodwait_retry(max_retries=3):
-    """Wait for Telegram's rate-limit window instead of crashing on startup."""
+async def start_bot_with_floodwait_retry(max_retries=5):
+    """Start Telegram without blocking the HTTP health-check server."""
     for attempt in range(1, max_retries + 1):
         try:
-            return TechVJBot.start()
+            await TechVJBot.start()
+            logging.info("Telegram bot connected successfully.")
+            return
         except FloodWait as error:
             wait_seconds = max(1, int(getattr(error, "value", 30))) + 2
             logging.warning(
@@ -44,14 +46,22 @@ def start_bot_with_floodwait_retry(max_retries=3):
             )
             if attempt >= max_retries:
                 raise
-            time.sleep(wait_seconds)
+            await asyncio.sleep(wait_seconds)
 
-
-start_bot_with_floodwait_retry()
 
 async def start():
     print('\n')
-    print('Initializing Your Bot')
+    print('Initializing MovieMasalas web service')
+
+    # Start HTTP first so Koyeb health checks pass while Telegram applies FloodWait.
+    app = web.AppRunner(await web_server())
+    await app.setup()
+    bind_address = "0.0.0.0"
+    await web.TCPSite(app, bind_address, PORT).start()
+    logging.info("HTTP server listening on %s:%s", bind_address, PORT)
+
+    print('Connecting Telegram bot')
+    await start_bot_with_floodwait_retry()
     bot_info = await TechVJBot.get_me()
     await initialize_clients()
     
@@ -82,10 +92,6 @@ async def start():
     
     await TechVJBot.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
     
-    app = web.AppRunner(await web_server())
-    await app.setup()
-    bind_address = "0.0.0.0"
-    await web.TCPSite(app, bind_address, PORT).start()
     await idle()
 
 def handle_sigterm(signal, frame):
