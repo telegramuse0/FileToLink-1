@@ -169,56 +169,45 @@ class ByteStreamer:
         last_part_cut: int,
         part_count: int,
         chunk_size: int,
-    ) -> Union[str, None]:
+    ):
         """
-        Custom generator that yields the bytes of the media file.
-        Modded from <https://github.com/eyaadh/megadlbot_oss/blob/master/mega/telegram/utils/custom_download.py#L20>
-        Thanks to Eyaadh <https://github.com/eyaadh>
+        Stream an exact byte range using Pyrogram's built-in downloader.
+        Client.get_file handles Telegram CDN redirects and encrypted CDN chunks.
         """
         client = self.client
         work_loads[index] += 1
-        logging.debug(f"Starting to yielding file with client {index}.")
-        media_session = await self.generate_media_session(client, file_id)
-
-        current_part = 1
-        location = await self.get_location(file_id)
-
+        current_part = 0
         try:
-            r = await media_session.send(
-                raw.functions.upload.GetFile(
-                    location=location, offset=offset, limit=chunk_size
-                ),
+            chunks = client.get_file(
+                file_id,
+                file_size=file_id.file_size,
+                limit=part_count,
+                offset=offset // chunk_size,
             )
-            if isinstance(r, raw.types.upload.File):
-                while True:
-                    chunk = r.bytes
-                    if not chunk:
-                        break
-                    elif part_count == 1:
-                        yield chunk[first_part_cut:last_part_cut]
-                    elif current_part == 1:
-                        yield chunk[first_part_cut:]
-                    elif current_part == part_count:
-                        yield chunk[:last_part_cut]
-                    else:
-                        yield chunk
+            async for chunk in chunks:
+                if not chunk:
+                    raise IOError("Telegram returned an empty media chunk")
+                current_part += 1
+                if part_count == 1:
+                    chunk = chunk[first_part_cut:last_part_cut]
+                elif current_part == 1:
+                    chunk = chunk[first_part_cut:]
+                elif current_part == part_count:
+                    chunk = chunk[:last_part_cut]
+                if chunk:
+                    yield chunk
 
-                    current_part += 1
-                    offset += chunk_size
-
-                    if current_part > part_count:
-                        break
-
-                    r = await media_session.send(
-                        raw.functions.upload.GetFile(
-                            location=location, offset=offset, limit=chunk_size
-                        ),
-                    )
-        except (TimeoutError, AttributeError):
-            pass
+            if current_part != part_count:
+                raise IOError(
+                    f"Incomplete Telegram stream: received {current_part} of {part_count} chunks"
+                )
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logging.exception("Telegram media stream failed for message file")
+            raise
         finally:
-            logging.debug("Finished yielding file with {current_part} parts.")
-            work_loads[index] -= 1
+            work_loads[index] = max(0, work_loads.get(index, 1) - 1)
 
     
     async def clean_cache(self) -> None:
