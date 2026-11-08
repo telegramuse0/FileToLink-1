@@ -124,8 +124,10 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
     # Inclusive chunk count: avoids a zero/short stream at exact chunk boundaries.
     part_count = ((until_bytes // chunk_size) - (offset // chunk_size)) + 1
 
-    mime_type = file_id.mime_type or mimetypes.guess_type(file_id.file_name or "")[0]
-    mime_type = mime_type or "application/octet-stream"
+    guessed_mime = mimetypes.guess_type(file_id.file_name or "")[0]
+    mime_type = file_id.mime_type or ""
+    if not mime_type or mime_type == "application/octet-stream":
+        mime_type = guessed_mime or mime_type or "application/octet-stream"
     file_name = file_id.file_name or f"{secrets.token_hex(4)}.bin"
     safe_name = file_name.replace('"', "'").replace("\\", "_")
     disposition = "inline" if mime_type.startswith(("video/", "audio/")) else "attachment"
