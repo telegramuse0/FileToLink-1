@@ -161,9 +161,7 @@ class_cacasync def media_streamer(request: web.Request, id: int, secure_hash: st
         raise
 
     return response
-       )
 
-    chunk_size = 1024 * 1024
     until_bytes = min(until_bytes, file_size - 1)
 
     offset = from_bytes - (from_bytes % chunk_size)
