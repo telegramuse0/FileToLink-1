@@ -272,6 +272,117 @@ footer b { color:#ff435a;text-shadow:0 0 14px #ff173855; }
   .app strong { font-size:11px; }
 }
 
+
+/* Reference-matched MovieMasalas cinema layout */
+body {
+  background:
+    radial-gradient(ellipse at 50% 8%,#52000d 0,transparent 36%),
+    radial-gradient(ellipse at 0% 55%,#270008 0,transparent 32%),
+    #030304;
+}
+.container { width:min(980px,100%);padding-left:24px;padding-right:24px; }
+header { padding:24px 0 22px;border-bottom:1px solid #ff334522; }
+.brand-logo {
+  width:78px;height:78px;flex-basis:78px;object-fit:cover;
+  border-radius:17px;border:1px solid #ff435a;
+  box-shadow:0 0 25px #ff173866,0 0 55px #ff173822;
+}
+.brand-name { font-size:clamp(23px,3vw,36px);letter-spacing:-1.4px; }
+.brand-sub { font-size:12px;letter-spacing:2px;color:#fff; }
+.telegram {
+  padding:14px 22px;border:2px solid #ff314d;border-radius:18px;
+  box-shadow:0 0 18px #ff173855,inset 0 0 15px #ff17381a;
+  font-size:17px;
+}
+.hero-showcase {
+  min-height:210px;display:flex;align-items:center;justify-content:space-between;
+  gap:20px;padding:40px 24px 30px;
+}
+.hero-copy { position:relative;z-index:1; }
+.eyebrow { display:flex;align-items:center;gap:14px;letter-spacing:4px;color:#fff;font-size:13px; }
+.eyebrow span { width:38px;height:2px;background:#ff263f;box-shadow:0 0 12px #ff263f; }
+h1 { font-size:clamp(36px,5.5vw,54px);line-height:1.08;letter-spacing:-1.6px;margin:18px 0 0; }
+.gradient-text { background:linear-gradient(90deg,#ff1738,#ff354d);-webkit-background-clip:text;background-clip:text;color:transparent; }
+.hero-clapper { width:220px;max-width:30%;filter:drop-shadow(0 0 17px #ff173866);flex-shrink:0; }
+.player-box {
+  margin-top:4px;padding:18px 20px 20px;border:1.5px solid #ff5368;
+  border-radius:25px;background:linear-gradient(145deg,#13070b,#080709 70%);
+  box-shadow:0 0 0 1px #ff173822,0 0 25px #ff173833,0 12px 42px #0009;
+}
+.player-top { margin:0 8px 17px; }
+.player-top strong { font-size:22px; }
+.video-wrap { border-radius:18px;box-shadow:0 0 20px #ff17381a; }
+.big-play { width:86px;height:86px;border:2px solid #ff6478;box-shadow:0 0 0 10px #ff17381c,0 0 35px #ff173888; }
+.section-head { justify-content:center;margin:30px 0 18px; }
+.section-title { display:flex;align-items:center;gap:20px;font-size:17px;letter-spacing:3px; }
+.section-title:before,.section-title:after { content:"";width:54px;height:2px;background:#ff263f;box-shadow:0 0 12px #ff263f; }
+.section-note { display:none; }
+.apps { max-width:760px;margin:0 auto;gap:28px; }
+.app {
+  min-height:68px;padding:12px 18px;border-radius:16px;gap:14px;
+  justify-content:center;background:linear-gradient(110deg,#171116,#08090d);
+  box-shadow:0 0 15px #0008;
+}
+.app:first-child { border:1.5px solid #ffb12f;box-shadow:0 0 16px #ff9b202b,inset 0 0 12px #ff9b2012; }
+.app:last-child { border:1.5px solid #20baff;box-shadow:0 0 16px #20baff30,inset 0 0 12px #20baff12; }
+.app strong { font-size:18px; }
+.app-icon { width:34px;height:34px;flex-basis:34px;background:transparent; }
+.app-icon svg { width:32px;height:32px; }
+.actions { grid-template-columns:1fr 1fr;gap:16px;margin:26px 16px 0; }
+.btn { min-height:68px;border-radius:18px;font-size:19px;gap:14px; }
+.btn svg { width:25px;height:25px; }
+.btn-secondary { border:1.5px solid #f3c7d0;background:linear-gradient(110deg,#252027,#0c0b10);box-shadow:0 0 18px #ff526922; }
+.btn-primary { border:1.5px solid #ff5368;background:linear-gradient(105deg,#ff1738,#c40020 65%,#ff3047);box-shadow:0 0 22px #ff173866,inset 0 1px 0 #ffffff55; }
+.howto {
+  display:grid;grid-template-columns:190px 1fr;align-items:center;gap:24px;
+  padding:24px 28px;margin:34px 0 0;border:1.5px solid #ff5368;border-radius:25px;
+  background:linear-gradient(130deg,#21080e,#0b080b 65%);
+  box-shadow:0 0 22px #ff173833;
+}
+.howto-art { display:grid;place-items:center;border-right:1px solid #ff526955;padding-right:22px; }
+.howto-art svg { width:145px;filter:drop-shadow(0 0 13px #ff173877); }
+.howto h2 { font-size:25px;margin:0 0 18px; }
+.step { gap:14px;margin-top:12px; }
+.step-num { width:40px;height:32px;border-radius:12px;background:linear-gradient(110deg,#ff1738,#b60020);color:#fff;font-size:15px;box-shadow:0 0 12px #ff173855; }
+.step p { color:#f2e9ec;font-size:15px;line-height:1.55; }
+footer { padding:34px 0 8px;color:#fff;font-size:18px;font-weight:600; }
+footer b { color:#ff435a; }
+@media(max-width:650px) {
+  .container { padding:0 14px 28px; }
+  header { padding:16px 0;gap:9px; }
+  .brand { gap:9px; }
+  .brand-logo { width:47px;height:47px;flex-basis:47px;border-radius:12px; }
+  .brand-name { font-size:20px; }
+  .brand-sub { font-size:8px;letter-spacing:.8px; }
+  .telegram { padding:10px 11px;font-size:11px;border-radius:12px;gap:5px; }
+  .hero-showcase { min-height:150px;padding:30px 2px 22px;gap:4px; }
+  .eyebrow { font-size:9px;letter-spacing:2px;gap:7px; }
+  .eyebrow span { width:17px; }
+  h1 { font-size:clamp(29px,7.4vw,42px);letter-spacing:-1px;margin-top:13px; }
+  .hero-clapper { width:104px;max-width:29%; }
+  .player-box { padding:12px;border-radius:19px; }
+  .player-top strong { font-size:16px; }
+  .big-play { width:68px;height:68px; }
+  .section-head { margin:24px 0 14px; }
+  .section-title { font-size:12px;letter-spacing:1.7px;gap:10px; }
+  .section-title:before,.section-title:after { width:24px; }
+  .apps { gap:10px; }
+  .app { min-height:58px;padding:8px 5px;gap:7px;border-radius:12px; }
+  .app strong { font-size:12px; }
+  .app-icon,.app-icon svg { width:25px;height:25px; }
+  .app-icon { flex-basis:25px; }
+  .actions { grid-template-columns:1fr;gap:10px;margin:20px 0 0; }
+  .btn { min-height:58px;font-size:15px;border-radius:14px; }
+  .howto { grid-template-columns:72px 1fr;gap:12px;padding:16px 12px;margin-top:24px;border-radius:19px; }
+  .howto-art { padding-right:10px; }
+  .howto-art svg { width:70px; }
+  .howto h2 { font-size:17px;margin-bottom:12px; }
+  .step { gap:8px;margin-top:9px; }
+  .step-num { width:28px;height:25px;border-radius:9px;font-size:12px; }
+  .step p { font-size:11px;line-height:1.5; }
+  footer { padding:25px 0 5px;font-size:12px; }
+}
+
 </style>
 </head>
 <body>
@@ -293,9 +404,20 @@ footer b { color:#ff435a;text-shadow:0 0 14px #ff173855; }
   </a>
 </header>
 
-<section class="hero">
-  <div class="eyebrow">MOVIEMASALAS STREAMING</div>
-  <h1>Your movie.<br><span class="gradient-text">Your way to watch.</span></h1>
+<section class="hero hero-showcase">
+  <div class="hero-copy">
+    <div class="eyebrow"><span></span>MOVIEMASALAS STREAMING<span></span></div>
+    <h1>Your Movie.<br><span class="gradient-text">Your Way to Watch.</span></h1>
+  </div>
+  <svg class="hero-clapper" viewBox="0 0 220 190" role="img" aria-label="Cinema clapperboard">
+    <defs><linearGradient id="clapGlow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff9aa5"/><stop offset=".55" stop-color="#ff1738"/><stop offset="1" stop-color="#8d0018"/></linearGradient></defs>
+    <g transform="rotate(-8 110 95)" fill="none" stroke="url(#clapGlow)" stroke-width="5" stroke-linejoin="round">
+      <path d="M32 64 185 42 197 75 44 97Z" fill="#25070d"/>
+      <path d="m50 62 19-3 12 32-19 3Zm53-8 19-3 12 32-19 3Zm53-8 18-3 12 32-18 3Z" fill="#fff"/>
+      <rect x="42" y="91" width="151" height="80" rx="10" fill="#16080d"/>
+      <path d="m103 113 38 19-38 19Z" fill="#fff" stroke="none"/>
+    </g>
+  </svg>
 </section>
 
 <section class="player-box">
@@ -366,10 +488,20 @@ footer b { color:#ff435a;text-shadow:0 0 14px #ff173855; }
 </div>
 
 <section class="howto">
-  <h2>How to watch</h2>
-  <div class="step"><span class="step-num">1</span><p>Press the play button to try streaming in your browser.</p></div>
-  <div class="step"><span class="step-num">2</span><p>If playback is unsupported, try a compatible external media player.</p></div>
-  <div class="step"><span class="step-num">3</span><p>You can also copy the stream URL or download the file.</p></div>
+  <div class="howto-art" aria-hidden="true">
+    <svg viewBox="0 0 150 130" fill="none">
+      <path d="m19 40 91-20 10 24-91 20Z" fill="#25070d" stroke="#ff5269" stroke-width="3"/>
+      <path d="m30 37 14-3 9 24-14 3Zm32-7 14-3 9 24-14 3Zm32-7 14-3 9 24-14 3Z" fill="#fff" stroke="#ff5269" stroke-width="2"/>
+      <path d="m30 61 93-17 12 58-93 17Z" fill="#16080d" stroke="#ff5269" stroke-width="3"/>
+      <path d="m68 73 27 15-22 21Z" fill="#fff"/>
+    </svg>
+  </div>
+  <div class="howto-copy">
+    <h2>How to watch</h2>
+    <div class="step"><span class="step-num">1</span><p>Press the play button to try streaming in your browser.</p></div>
+    <div class="step"><span class="step-num">2</span><p>If playback is unsupported, try a compatible external media player.</p></div>
+    <div class="step"><span class="step-num">3</span><p>You can also copy the stream URL or download the file.</p></div>
+  </div>
 </section>
 
 <footer>
