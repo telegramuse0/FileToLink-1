@@ -63,7 +63,10 @@ async def stream_handler(request: web.Request):
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
 
-class_cacasync def media_streamer(request: web.Request, id: int, secure_hash: str):
+class_cache = {}
+
+
+async def media_streamer(request: web.Request, id: int, secure_hash: str):
     range_header = request.headers.get("Range")
 
     index = min(work_loads, key=work_loads.get)
