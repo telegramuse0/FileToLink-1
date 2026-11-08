@@ -7,11 +7,9 @@ from TechVJ.server.exceptions import InvalidHash
 import urllib.parse
 import logging
 import mimetypes
-import aiohttp
 
 
 async def render_page(id, secure_hash, src=None):
-    file = await TechVJBot.get_messages(int(LOG_CHANNEL), int(id))
     file_data = await get_file_ids(TechVJBot, int(LOG_CHANNEL), int(id))
     if not file_data:
         raise InvalidHash
