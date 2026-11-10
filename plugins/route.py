@@ -22,17 +22,17 @@ async def root_route_handler(request):
 def parse_stream_path(request: web.Request):
     """Return (message_id, hash) or raise a clean 404 for unrelated paths."""
     path = request.match_info.get("path", "")
-    match = re.search(r"^([a-zA-Z0-9_-]{6})(\\d+)$", path)
+    match = re.search(r"^([a-zA-Z0-9_-]{6})(\d+)$", path)
     if match:
         return int(match.group(2)), match.group(1)
 
-    match = re.search(r"(\\d+)(?:/|$)", path)
+    match = re.search(r"(\d+)(?:/|$)", path)
     if not match:
         raise web.HTTPNotFound(text="Invalid file link")
     return int(match.group(1)), request.rel_url.query.get("hash")
 
 
-@routes.get(r"/watch/{path:\\S+}", allow_head=True)
+@routes.get(r"/watch/{path:\S+}", allow_head=True)
 async def watch_handler(request: web.Request):
     try:
         id, secure_hash = parse_stream_path(request)
@@ -54,7 +54,7 @@ async def watch_handler(request: web.Request):
         raise web.HTTPInternalServerError(text="Unable to load player page")
 
 
-@routes.get(r"/{path:\\S+}", allow_head=True)
+@routes.get(r"/{path:\S+}", allow_head=True)
 async def stream_handler(request: web.Request):
     try:
         id, secure_hash = parse_stream_path(request)
@@ -139,7 +139,7 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
     if not mime_type or mime_type == "application/octet-stream":
         mime_type = guessed_mime or mime_type or "application/octet-stream"
     file_name = file_id.file_name or f"{secrets.token_hex(4)}.bin"
-    safe_name = file_name.replace('"', "'").replace("\\", "_")
+    safe_name = file_name.replace('"', "'").replace("\", "_")
     disposition = "inline" if mime_type.startswith(("video/", "audio/")) else "attachment"
 
     headers = {
