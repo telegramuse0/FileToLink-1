@@ -19,49 +19,59 @@ routes = web.RouteTableDef()
 async def root_route_handler(request):
     return web.json_response("BenFilterBot")
 
-@routes.get(r"/watch/{path:\S+}", allow_head=True)
-async def stream_handler(request: web.Request):
+def parse_stream_path(request: web.Request):
+    """Return (message_id, hash) or raise a clean 404 for unrelated paths."""
+    path = request.match_info.get("path", "")
+    match = re.search(r"^([a-zA-Z0-9_-]{6})(\\d+)$", path)
+    if match:
+        return int(match.group(2)), match.group(1)
+
+    match = re.search(r"(\\d+)(?:/|$)", path)
+    if not match:
+        raise web.HTTPNotFound(text="Invalid file link")
+    return int(match.group(1)), request.rel_url.query.get("hash")
+
+
+@routes.get(r"/watch/{path:\\S+}", allow_head=True)
+async def watch_handler(request: web.Request):
     try:
-        path = request.match_info["path"]
-        match = re.search(r"^([a-zA-Z0-9_-]{6})(\d+)$", path)
-        if match:
-            secure_hash = match.group(1)
-            id = int(match.group(2))
-        else:
-            id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
-            secure_hash = request.rel_url.query.get("hash")
-        return web.Response(text=await render_page(id, secure_hash), content_type='text/html')
+        id, secure_hash = parse_stream_path(request)
+        return web.Response(
+            text=await render_page(id, secure_hash),
+            content_type="text/html",
+        )
     except InvalidHash as e:
         raise web.HTTPForbidden(text=e.message)
     except FIleNotFound as e:
         raise web.HTTPNotFound(text=e.message)
     except (BadStatusLine, ConnectionResetError):
-        pass
-    except Exception as e:
-        logging.critical(e.with_traceback(None))
-        raise web.HTTPInternalServerError(text=str(e))
+        logging.info("Client disconnected while loading player page")
+        raise web.HTTPClientError(text="Client disconnected")
+    except web.HTTPException:
+        raise
+    except Exception:
+        logging.exception("Player page request failed")
+        raise web.HTTPInternalServerError(text="Unable to load player page")
 
-@routes.get(r"/{path:\S+}", allow_head=True)
+
+@routes.get(r"/{path:\\S+}", allow_head=True)
 async def stream_handler(request: web.Request):
     try:
-        path = request.match_info["path"]
-        match = re.search(r"^([a-zA-Z0-9_-]{6})(\d+)$", path)
-        if match:
-            secure_hash = match.group(1)
-            id = int(match.group(2))
-        else:
-            id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
-            secure_hash = request.rel_url.query.get("hash")
+        id, secure_hash = parse_stream_path(request)
         return await media_streamer(request, id, secure_hash)
     except InvalidHash as e:
         raise web.HTTPForbidden(text=e.message)
     except FIleNotFound as e:
         raise web.HTTPNotFound(text=e.message)
     except (BadStatusLine, ConnectionResetError):
-        pass
-    except Exception as e:
-        logging.critical(e.with_traceback(None))
-        raise web.HTTPInternalServerError(text=str(e))
+        logging.info("Client disconnected while handling stream request")
+        raise web.HTTPClientError(text="Client disconnected")
+    except web.HTTPException:
+        raise
+    except Exception:
+        logging.exception("Media stream request failed")
+        raise web.HTTPInternalServerError(text="Unable to stream media")
+
 
 class_cache = {}
 
