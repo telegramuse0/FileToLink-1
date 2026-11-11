@@ -1,21 +1,32 @@
-import os
 from urllib.parse import quote_plus
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from info import LOG_CHANNEL, URL, SHORTLINK
-from utils import get_name, get_hash, humanbytes, get_media_file_size
+from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 
 try:
     from utils import get_shortlink
 except ImportError:
     get_shortlink = None
 
+
+def humanbytes(size):
+    size = float(size or 0)
+    if size <= 0:
+        return "0 B"
+    units = ("B", "KB", "MB", "GB", "TB")
+    for unit in units:
+        if size < 1024 or unit == units[-1]:
+            return f"{size:.2f} {unit}" if unit != "B" else f"{int(size)} B"
+        size /= 1024
+
+
 @Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
 async def file_receive(client: Client, message: Message):
     # 1. User & Media Info
     user_id = message.from_user.id if message.from_user else 0
     username = f"@{message.from_user.username}" if message.from_user and message.from_user.username else (message.from_user.first_name if message.from_user else "Unknown")
-    
+
     media = getattr(message, message.media.value, None)
     fileid = media.file_id if media else ""
 
@@ -37,10 +48,10 @@ async def file_receive(client: Client, message: Message):
     except Exception:
         log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)
 
-    fname = get_name(log_msg)
+    fname = get_name(log_msg) or getattr(media, "file_name", None) or "Telegram Media"
     fsize = humanbytes(get_media_file_size(message))
 
-    # 4. Clean URL formatting (Ensure trailing slash exists)
+    # 4. Clean URL formatting
     base_url = URL.strip()
     if base_url and not base_url.endswith("/"):
         base_url += "/"
@@ -62,7 +73,7 @@ async def file_receive(client: Client, message: Message):
         ]
     ])
 
-    # 7. Log channel message (1st Image format)
+    # 7. Log channel message
     log_caption = f"""<b><u>log channel</u></b>
 <i>{fname}</i>
 
