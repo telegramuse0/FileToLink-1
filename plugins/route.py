@@ -133,10 +133,15 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
     mime_type = file_id.mime_type or mimetypes.guess_type(file_name)[0]
     mime_type = mime_type or "application/octet-stream"
 
+    disposition = "attachment" if request.rel_url.query.get("download") == "1" else "inline"
+    ascii_name = file_name.encode("ascii", "ignore").decode("ascii") or "download"
+    ascii_name = ascii_name.replace('"', "'").replace("\\", "_")
+    encoded_name = quote(file_name, safe="")
+
     headers = {
         "Content-Type": mime_type,
         "Content-Length": str(until_bytes - from_bytes + 1),
-        "Content-Disposition": f"inline; filename*=UTF-8''{quote(file_name)}",
+        "Content-Disposition": f"{disposition}; filename=\"{ascii_name}\"; filename*=UTF-8''{encoded_name}",
         "Accept-Ranges": "bytes",
     }
     if status == 206:
