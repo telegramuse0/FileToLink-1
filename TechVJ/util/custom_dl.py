@@ -171,16 +171,16 @@ class ByteStreamer:
         chunk_size: int,
     ):
         """
-        Stream an exact byte range using Pyrogram's built-in downloader.
-        Client.get_file handles Telegram CDN redirects and encrypted CDN chunks.
+        Stream an exact byte range with Pyrofork's public stream_media API.
+        stream_media handles Telegram media sessions and CDN redirects.
         """
         client = self.client
         work_loads[index] += 1
         current_part = 0
         try:
-            chunks = client.get_file(
-                file_id,
-                file_size=file_id.file_size,
+            encoded_file_id = file_id.encode()
+            chunks = client.stream_media(
+                encoded_file_id,
                 limit=part_count,
                 offset=offset // chunk_size,
             )
@@ -204,12 +204,11 @@ class ByteStreamer:
         except asyncio.CancelledError:
             raise
         except Exception:
-            logging.exception("Telegram media stream failed for message file")
+            logging.exception("Telegram media stream failed for file")
             raise
         finally:
             work_loads[index] = max(0, work_loads.get(index, 1) - 1)
 
-    
     async def clean_cache(self) -> None:
         """
         function to clean the cache to reduce memory usage
