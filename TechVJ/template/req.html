@@ -607,8 +607,12 @@ document.getElementById('copyButton').addEventListener('click', async () => {
 const absoluteUrl = new URL(mediaUrl, location.href);
 const externalUrl = absoluteUrl.href.replace(/^https?:\/\//, '');
 
-document.getElementById('vlc').href =
-  makeAndroidIntent('org.videolan.vlc');
+const isAndroid = /Android/i.test(navigator.userAgent);
+const vlcLink = document.getElementById('vlc');
+
+vlcLink.href = isAndroid
+  ? makeAndroidIntent('org.videolan.vlc')
+  : '#';
 
 function makeAndroidIntent(packageName) {
   return 'intent://' + externalUrl +
@@ -616,16 +620,29 @@ function makeAndroidIntent(packageName) {
     ';type=video/*;package=' + packageName + ';end';
 }
 
+vlcLink.addEventListener('click', async (event) => {
+  if (isAndroid) {
+    showStatus('Opening VLC…');
+    return;
+  }
+
+  event.preventDefault();
+  try {
+    await navigator.clipboard.writeText(absoluteUrl.href);
+    showStatus('Stream link copied. In VLC, choose Media > Open Network Stream and paste it.');
+  } catch (error) {
+    showStatus('Copy unavailable. Open this stream URL in VLC: ' + absoluteUrl.href);
+  }
+});
+
 document.getElementById('mx').href =
   makeAndroidIntent('com.mxtech.videoplayer.ad');
 
-for (const id of ['vlc', 'mx']) {
-  document.getElementById(id).addEventListener('click', () => {
-    showStatus(
-      'If the app does not open, it may not be installed or may not support this link.'
-    );
-  });
-}
+document.getElementById('mx').addEventListener('click', () => {
+  showStatus(
+    'If MX Player does not open, it may not be installed or may not support this link.'
+  );
+});
 </script>
 </body>
 </html>
