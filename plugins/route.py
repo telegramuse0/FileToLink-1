@@ -81,7 +81,7 @@ def get_requested_filename(request: web.Request):
     if len(parts) != 2:
         return ""
     name = unquote_plus(parts[1])
-    name = os.path.basename(name.replace("\\\\", "/")).strip()
+    name = os.path.basename(name.replace("\\", "/")).strip()
     if not name or name in (".", ".."):
         return ""
     return name
@@ -151,7 +151,7 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
     # Prefer the original filename embedded in the generated URL. This avoids
     # Telegram/proxy MIME metadata changing an MKV download to a .txt filename.
     file_name = get_requested_filename(request) or file_id.file_name or f"{secrets.token_hex(4)}.bin"
-    file_name = file_name.replace('"', "'").replace("\\\\", "_")
+    file_name = file_name.replace('"', "'").replace("\\", "_")
     guessed_mime = mimetypes.guess_type(file_name)[0]
     mime_type = file_id.mime_type or ""
     if not mime_type or mime_type in ("application/octet-stream", "text/plain"):
@@ -161,7 +161,7 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
 
     disposition = "inline" if mime_type.startswith(("video/", "audio/")) else "attachment"
     ascii_name = file_name.encode("ascii", "ignore").decode("ascii") or "download"
-    ascii_name = ascii_name.replace('"', "'").replace("\\\\", "_")
+    ascii_name = ascii_name.replace('"', "'").replace("\\", "_")
     encoded_name = quote(file_name, safe="")
 
     headers = {
