@@ -60,7 +60,7 @@ async def file_receive(client: Client, message: Message):
 
     file_hash = get_hash(log_msg)
     stream = f"{base_url}watch/{log_msg.id}/{quote_plus(fname)}?hash={file_hash}"
-    download = f"{base_url}{log_msg.id}/{quote_plus(fname)}?hash={file_hash}&download=1"
+    download = f"{base_url}download/{log_msg.id}/{quote_plus(fname)}?hash={file_hash}"
 
     # 5. Shortlink agar enabled ho
     if SHORTLINK and get_shortlink:
