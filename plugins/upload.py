@@ -48,7 +48,9 @@ async def file_receive(client: Client, message: Message):
     except Exception:
         log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)
 
-    fname = get_name(log_msg) or getattr(media, "file_name", None) or "Telegram Media"
+    # Keep the exact filename supplied with the original incoming Telegram file.
+    # A copied/forwarded LOG_CHANNEL message can expose incomplete or altered metadata.
+    fname = getattr(media, "file_name", None) or get_name(log_msg) or "Telegram Media"
     fsize = humanbytes(get_media_file_size(message))
 
     # 4. Clean URL formatting
