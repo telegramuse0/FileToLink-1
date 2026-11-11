@@ -383,6 +383,40 @@ footer b { color:#ff435a; }
   footer { padding:25px 0 5px;font-size:12px; }
 }
 
+
+/* Custom player controls */
+.video-wrap { display:block;position:relative;aspect-ratio:16/9; }
+.video-wrap video { position:absolute;inset:0;width:100%;height:100%; }
+.player-controls {
+  position:absolute;left:0;right:0;bottom:0;z-index:5;
+  display:flex;align-items:center;gap:9px;padding:34px 12px 11px;
+  color:#fff;background:linear-gradient(transparent,#050507ed);
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.video-wrap.is-playing:hover .player-controls,
+.video-wrap.is-playing:focus-within .player-controls,
+.video-wrap.is-playing.controls-visible .player-controls { opacity:1;pointer-events:auto; }
+.player-controls button,.player-controls select {
+  border:0;background:#ffffff18;color:#fff;border-radius:8px;
+  min-width:34px;height:34px;padding:0 8px;cursor:pointer;
+}
+.player-controls button:hover { background:#ff1738; }
+.player-controls select { font-size:12px; }
+.player-controls input[type=range] { accent-color:#ff304b;min-width:0;cursor:pointer; }
+.player-seek { flex:1;width:100%; }
+.player-volume { width:76px; }
+.player-time { font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums;color:#fff; }
+@media(max-width:560px) {
+  .player-controls { gap:5px;padding:28px 7px 7px; }
+  .player-controls button { min-width:30px;height:31px;padding:0 5px;font-size:12px; }
+  .player-volume { width:48px; }
+  .player-time { font-size:10px; }
+  .player-controls select { max-width:58px;padding:0 3px;font-size:11px; }
+}
+.video-wrap:fullscreen { width:100%;height:100%;aspect-ratio:auto;border-radius:0;background:#000; }
+.video-wrap:fullscreen video { object-fit:contain; }
+.video-wrap:fullscreen .player-controls { padding:45px 20px 18px; }
+
 </style>
 </head>
 <body>
@@ -427,7 +461,7 @@ footer b { color:#ff435a; }
   </div>
 
   <div class="video-wrap">
-    <video id="video" controls playsinline preload="metadata"></video>
+    <video id="video" playsinline webkit-playsinline preload="metadata"></video>
     <div class="video-placeholder" id="placeholder">
       <button class="big-play" id="playButton" type="button" aria-label="Start playback">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -436,6 +470,21 @@ footer b { color:#ff435a; }
       </button>
       <div class="placeholder-title">Ready when you are</div>
       <div class="placeholder-sub">Press play to try browser playback.<br>Compatibility depends on the file format.</div>
+    </div>
+    <div class="player-controls" id="playerControls" aria-label="Video controls">
+      <button id="togglePlay" type="button" aria-label="Play or pause">▶</button>
+      <span class="player-time" id="currentTime">0:00</span>
+      <input class="player-seek" id="seekBar" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek">
+      <span class="player-time" id="duration">0:00</span>
+      <button id="muteButton" type="button" aria-label="Mute">🔊</button>
+      <input class="player-volume" id="volumeBar" type="range" min="0" max="1" value="1" step="0.05" aria-label="Volume">
+      <select id="speedSelect" aria-label="Playback speed">
+        <option value="0.5">0.5×</option><option value="0.75">0.75×</option>
+        <option value="1" selected>1×</option><option value="1.25">1.25×</option>
+        <option value="1.5">1.5×</option><option value="2">2×</option>
+      </select>
+      <button id="pipButton" type="button" aria-label="Picture in picture">▣</button>
+      <button id="fullscreenButton" type="button" aria-label="Fullscreen">⛶</button>
     </div>
   </div>
 
@@ -518,6 +567,87 @@ const placeholder = document.getElementById('placeholder');
 const statusBox = document.getElementById('status');
 const playButton = document.getElementById('playButton');
 
+const videoWrap = document.querySelector('.video-wrap');
+const togglePlay = document.getElementById('togglePlay');
+const seekBar = document.getElementById('seekBar');
+const currentTimeLabel = document.getElementById('currentTime');
+const durationLabel = document.getElementById('duration');
+const muteButton = document.getElementById('muteButton');
+const volumeBar = document.getElementById('volumeBar');
+const speedSelect = document.getElementById('speedSelect');
+const pipButton = document.getElementById('pipButton');
+const fullscreenButton = document.getElementById('fullscreenButton');
+
+function formatTime(seconds) {
+  if (!Number.isFinite(seconds)) return '0:00';
+  const s = Math.floor(seconds);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+function syncPlayButton() {
+  togglePlay.textContent = video.paused ? '▶' : 'Ⅱ';
+  togglePlay.setAttribute('aria-label', video.paused ? 'Play' : 'Pause');
+}
+togglePlay.addEventListener('click', () => {
+  if (video.paused) video.play().catch(() => showStatus('Unable to start playback.'));
+  else video.pause();
+});
+video.addEventListener('play', syncPlayButton);
+video.addEventListener('pause', syncPlayButton);
+video.addEventListener('timeupdate', () => {
+  currentTimeLabel.textContent = formatTime(video.currentTime);
+  if (Number.isFinite(video.duration) && video.duration > 0) {
+    seekBar.value = String(Math.round(video.currentTime / video.duration * 1000));
+  }
+});
+video.addEventListener('loadedmetadata', () => {
+  durationLabel.textContent = formatTime(video.duration);
+});
+seekBar.addEventListener('input', () => {
+  if (Number.isFinite(video.duration)) video.currentTime = Number(seekBar.value) / 1000 * video.duration;
+});
+muteButton.addEventListener('click', () => {
+  video.muted = !video.muted;
+  muteButton.textContent = video.muted || video.volume === 0 ? '🔇' : '🔊';
+});
+volumeBar.addEventListener('input', () => {
+  video.volume = Number(volumeBar.value);
+  video.muted = video.volume === 0;
+  muteButton.textContent = video.muted ? '🔇' : '🔊';
+});
+speedSelect.addEventListener('change', () => { video.playbackRate = Number(speedSelect.value); });
+pipButton.addEventListener('click', async () => {
+  try {
+    if (document.pictureInPictureElement) await document.exitPictureInPicture();
+    else if (document.pictureInPictureEnabled && video.requestPictureInPicture) await video.requestPictureInPicture();
+    else showStatus('Picture-in-picture is not supported by this browser.');
+  } catch (e) { showStatus('Picture-in-picture is unavailable for this video.'); }
+});
+fullscreenButton.addEventListener('click', async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else if (videoWrap.requestFullscreen) await videoWrap.requestFullscreen();
+    else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+    else showStatus('Fullscreen is not supported by this browser.');
+  } catch (e) { showStatus('Could not enter fullscreen.'); }
+});
+document.addEventListener('fullscreenchange', () => {
+  fullscreenButton.textContent = document.fullscreenElement ? '⛶' : '⛶';
+});
+videoWrap.addEventListener('dblclick', () => {
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  else if (videoWrap.requestFullscreen) videoWrap.requestFullscreen().catch(() => {});
+});
+document.addEventListener('keydown', (event) => {
+  const tag = event.target && event.target.tagName;
+  if (['INPUT','SELECT','TEXTAREA','BUTTON'].includes(tag)) return;
+  if (event.code === 'Space') { event.preventDefault(); togglePlay.click(); }
+  else if (event.key.toLowerCase() === 'f') fullscreenButton.click();
+  else if (event.key.toLowerCase() === 'm') muteButton.click();
+  else if (event.key === 'ArrowRight' && Number.isFinite(video.duration)) video.currentTime = Math.min(video.duration, video.currentTime + 10);
+  else if (event.key === 'ArrowLeft') video.currentTime = Math.max(0, video.currentTime - 10);
+});
+
+
 function showStatus(message) {
   statusBox.textContent = message;
 }
@@ -525,6 +655,7 @@ function showStatus(message) {
 function restorePlayer(message) {
   video.pause();
   video.classList.remove('active');
+  videoWrap.classList.remove('is-playing','controls-visible');
   video.removeAttribute('src');
   video.load();
   placeholder.classList.remove('hidden');
@@ -534,6 +665,7 @@ function restorePlayer(message) {
 playButton.addEventListener('click', async () => {
   video.src = mediaUrl;
   video.classList.add('active');
+  videoWrap.classList.add('is-playing','controls-visible');
   placeholder.classList.add('hidden');
   video.load();
 
@@ -558,6 +690,7 @@ video.addEventListener('loadedmetadata', () => {
 });
 
 video.addEventListener('playing', () => {
+  videoWrap.classList.add('is-playing');
   showStatus('');
 });
 
