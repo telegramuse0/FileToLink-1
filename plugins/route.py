@@ -42,6 +42,27 @@ async def stream_handler(request: web.Request):
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
 
+@routes.get(r"/download/{path:.+}", allow_head=True)
+async def download_handler(request: web.Request):
+    try:
+        path = request.match_info["path"]
+        match = re.search(r"(\\d+)", path)
+        if not match:
+            raise web.HTTPNotFound(text="Invalid download link")
+        id = int(match.group(1))
+        secure_hash = request.rel_url.query.get("hash")
+        return await media_streamer(request, id, secure_hash, force_download=True)
+    except InvalidHash as e:
+        raise web.HTTPForbidden(text=e.message)
+    except FIleNotFound as e:
+        raise web.HTTPNotFound(text=e.message)
+    except (AttributeError, BadStatusLine, ConnectionResetError):
+        raise web.HTTPBadRequest(text="Download connection interrupted")
+    except Exception as e:
+        logging.critical(e.with_traceback(None))
+        raise web.HTTPInternalServerError(text=str(e))
+
+
 @routes.get(r"/{path:.+}", allow_head=True)
 async def stream_handler(request: web.Request):
     try:
@@ -66,7 +87,7 @@ async def stream_handler(request: web.Request):
 
 class_cache = {}
 
-async def media_streamer(request: web.Request, id: int, secure_hash: str):
+async def media_streamer(request: web.Request, id: int, secure_hash: str, force_download: bool = False):
     index = min(work_loads, key=work_loads.get)
     faster_client = multi_clients[index]
 
@@ -133,7 +154,7 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
     mime_type = file_id.mime_type or mimetypes.guess_type(file_name)[0]
     mime_type = mime_type or "application/octet-stream"
 
-    disposition = "attachment" if request.rel_url.query.get("download") == "1" else "inline"
+    disposition = "attachment" if force_download or request.rel_url.query.get("download") == "1" else "inline"
     ascii_name = file_name.encode("ascii", "ignore").decode("ascii") or "download"
     ascii_name = ascii_name.replace('"', "'").replace("\\", "_")
     encoded_name = quote(file_name, safe="")
