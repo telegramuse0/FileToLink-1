@@ -9,7 +9,7 @@ import logging
 import mimetypes
 
 
-async def render_page(id, secure_hash, src=None):
+async def render_page(id, secure_hash, src=None, file_name_override=None):
     file_data = await get_file_ids(TechVJBot, int(LOG_CHANNEL), int(id))
     if not file_data:
         raise InvalidHash
@@ -17,7 +17,7 @@ async def render_page(id, secure_hash, src=None):
         logging.debug(f"Invalid hash for message with - ID {id}")
         raise InvalidHash
 
-    file_name = file_data.file_name or f"media_{id}"
+    file_name = file_name_override or file_data.file_name or f"media_{id}"
     guessed_mime = mimetypes.guess_type(file_name)[0]
     mime_type = file_data.mime_type or ""
     if not mime_type or mime_type == "application/octet-stream":
