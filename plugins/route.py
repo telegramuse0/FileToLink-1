@@ -38,7 +38,7 @@ async def watch_handler(request: web.Request):
     try:
         id, secure_hash = parse_stream_path(request)
         return web.Response(
-            text=await render_page(id, secure_hash),
+            text=await render_page(id, secure_hash, file_name_override=get_requested_filename(request)),
             content_type="text/html",
         )
     except InvalidHash as e:
