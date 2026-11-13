@@ -63,6 +63,26 @@ async def download_handler(request: web.Request):
         raise web.HTTPInternalServerError(text=str(e))
 
 
+@routes.get(r"/stream/{path:.+}", allow_head=True)
+async def inline_stream_handler(request: web.Request):
+    try:
+        path = request.match_info["path"]
+        match = re.search(r"(\\d+)", path)
+        if not match:
+            raise web.HTTPNotFound(text="Invalid stream link")
+        id = int(match.group(1))
+        secure_hash = request.rel_url.query.get("hash")
+        return await media_streamer(request, id, secure_hash, force_download=False)
+    except InvalidHash as e:
+        raise web.HTTPForbidden(text=e.message)
+    except FIleNotFound as e:
+        raise web.HTTPNotFound(text=e.message)
+    except (AttributeError, BadStatusLine, ConnectionResetError):
+        raise web.HTTPBadRequest(text="Stream connection interrupted")
+    except Exception as e:
+        logging.critical(e.with_traceback(None))
+        raise web.HTTPInternalServerError(text=str(e))
+
 @routes.get(r"/{path:.+}", allow_head=True)
 async def stream_handler(request: web.Request):
     try:
