@@ -100,10 +100,12 @@ async def stream_handler(request: web.Request):
         raise web.HTTPForbidden(text=e.message)
     except FIleNotFound as e:
         raise web.HTTPNotFound(text=e.message)
-    except (AttributeError, BadStatusLine, ConnectionResetError):
-        pass
+    except (AttributeError, BadStatusLine, ConnectionResetError) as e:
+    logging.warning("Client connection interrupted: %s", e)
+    raise web.HTTPBadRequest(text="Connection interrupted")
     except Exception as e:
-        logging.critical(e.with_traceback(None))
+        logging.critical(e.with_traceback(None))l
+        
         raise web.HTTPInternalServerError(text=str(e))
 
 class_cache = {}
