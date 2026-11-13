@@ -67,7 +67,7 @@ async def download_handler(request: web.Request):
 async def inline_stream_handler(request: web.Request):
     try:
         path = request.match_info["path"]
-        match = re.search(r"(\\d+)", path)
+        match = re.search(r"(\d+)", path)
         if not match:
             raise web.HTTPNotFound(text="Invalid stream link")
         id = int(match.group(1))
