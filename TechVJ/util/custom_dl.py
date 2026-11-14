@@ -171,40 +171,59 @@ class ByteStreamer:
         chunk_size: int,
     ):
         """
-        Stream an exact byte range with Pyrofork's public stream_media API.
-        stream_media handles Telegram media sessions and CDN redirects.
+        Download Telegram media in fixed byte ranges using Telegram's
+        upload.GetFile API. This restores the repository's original
+        ByteStreamer transport instead of relying on stream_media().
         """
         client = self.client
-        work_loads[index] += 1
-        current_part = 0
+        work_loads[index] = work_loads.get(index, 0) + 1
+        current_part = 1
         try:
-            encoded_file_id = file_id.encode()
-            chunks = client.stream_media(
-                encoded_file_id,
-                limit=part_count,
-                offset=offset // chunk_size,
-            )
-            async for chunk in chunks:
+            media_session = await self.generate_media_session(client, file_id)
+            location = await self.get_location(file_id)
+
+            while current_part <= part_count:
+                result = await media_session.send(
+                    raw.functions.upload.GetFile(
+                        location=location,
+                        offset=offset,
+                        limit=chunk_size,
+                    )
+                )
+
+                if not isinstance(result, raw.types.upload.File):
+                    raise IOError(
+                        f"Telegram returned an unsupported file response: {type(result).__name__}"
+                    )
+
+                chunk = result.bytes
                 if not chunk:
-                    raise IOError("Telegram returned an empty media chunk")
-                current_part += 1
+                    raise IOError(
+                        f"Telegram returned an empty chunk at byte offset {offset}"
+                    )
+
                 if part_count == 1:
                     chunk = chunk[first_part_cut:last_part_cut]
                 elif current_part == 1:
                     chunk = chunk[first_part_cut:]
                 elif current_part == part_count:
                     chunk = chunk[:last_part_cut]
+
                 if chunk:
                     yield chunk
 
-            if current_part != part_count:
-                raise IOError(
-                    f"Incomplete Telegram stream: received {current_part} of {part_count} chunks"
-                )
+                current_part += 1
+                offset += chunk_size
+
         except asyncio.CancelledError:
             raise
         except Exception:
-            logging.exception("Telegram media stream failed for file")
+            logging.exception(
+                "Telegram media download failed (client=%s, offset=%s, parts=%s)",
+                index,
+                offset,
+                part_count,
+            )
             raise
         finally:
             work_loads[index] = max(0, work_loads.get(index, 1) - 1)
